@@ -1,16 +1,16 @@
 package com.backend.doyouhave.domain.comment;
 
+import com.backend.doyouhave.domain.BaseTimeEntity;
 import lombok.Builder;
 import lombok.Getter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
-public class Comment {
+public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -23,26 +23,15 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    @Builder.Default
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
 
-    private LocalDateTime createdTime;
-
-    private LocalDateTime modifiedTime;
-
-    protected Comment() {
-
-    }
-
     public void create(String content) {
         this.content = content;
-        this.createdTime = LocalDateTime.now();
     }
 
     public void update(String content) {
         this.content = content;
-        this.modifiedTime = LocalDateTime.now();
     }
 
 }
