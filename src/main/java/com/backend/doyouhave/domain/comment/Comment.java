@@ -1,6 +1,7 @@
 package com.backend.doyouhave.domain.comment;
 
 import com.backend.doyouhave.domain.BaseTimeEntity;
+import com.backend.doyouhave.domain.post.Post;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -25,6 +26,10 @@ public class Comment extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     public void create(String content) {
         this.content = content;
