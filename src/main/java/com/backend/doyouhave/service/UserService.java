@@ -4,6 +4,7 @@ import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
+import com.backend.doyouhave.jwt.JwtTokenProvider;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final AuthService authService;
-
+    private final JwtTokenProvider jwtTokenProvider;
     public LoginResponseDto signup(Role role, String code) {
 
         if (role.equals(Role.KAKAO)) {
@@ -44,9 +45,10 @@ public class UserService {
     public LoginResponseDto login(User user) {
         // JWT 구현 예정
 
-        String accessToken = "accessToken";
         String refreshToken = "refreshToken";
 
-        return LoginResponseDto.from(accessToken, refreshToken);
+        return LoginResponseDto.from(
+                jwtTokenProvider.createAccessToken(user.getId()),
+                refreshToken);
     }
 }

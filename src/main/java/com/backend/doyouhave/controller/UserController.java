@@ -1,23 +1,18 @@
 package com.backend.doyouhave.controller;
 
-import com.backend.doyouhave.domain.post.Post;
-import com.backend.doyouhave.domain.post.dto.PostRequestDto;
-import com.backend.doyouhave.domain.post.dto.PostResponseDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.dto.LoginRequestDto;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
-import com.backend.doyouhave.service.PostService;
 import com.backend.doyouhave.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.io.IOException;
-import java.net.URI;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @RequestMapping("api/users")
@@ -29,6 +24,13 @@ public class UserController {
     public LoginResponseDto loginUser(@RequestBody @Valid LoginRequestDto request) {
         System.out.println("code = " + request.getCode());
         return userService.signup(Role.KAKAO, request.getCode());
+
+    }
+
+    @GetMapping("/profile")
+    public Boolean findUsersProfile(@AuthenticationPrincipal UserDetails user) {
+        System.out.println(user);
+        return true;
 
     }
 }

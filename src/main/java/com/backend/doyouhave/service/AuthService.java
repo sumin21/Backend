@@ -1,6 +1,7 @@
 package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.exception.SocialLoginException;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
@@ -58,8 +59,8 @@ public class AuthService {
             JSONObject elem = (JSONObject) parser.parse(response.getBody());
             System.out.println("elem = " + elem);
             accessToken = (String) elem.get("access_token");
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e.toString());
+        } catch (Exception e) {
+            throw new SocialLoginException();
         }
         return accessToken;
     }
@@ -90,8 +91,8 @@ public class AuthService {
             String img = (String) ((JSONObject) elem.get("properties")).get("profile_image");
 
             return Optional.ofNullable(User.createKakaoUser(id, email, img, nickname));
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e.toString());
+        } catch (Exception e) {
+            throw new SocialLoginException();
         }
     }
 }
