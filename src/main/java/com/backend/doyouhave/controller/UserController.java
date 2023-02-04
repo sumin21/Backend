@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 
@@ -25,7 +26,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/kakao-login")
-    public LoginResponseDto loginUser(@RequestBody LoginRequestDto request) {
+    public LoginResponseDto loginUser(@RequestBody @Valid LoginRequestDto request) {
         System.out.println("code = " + request.getCode());
         return userService.signup(Role.KAKAO, request.getCode());
 
