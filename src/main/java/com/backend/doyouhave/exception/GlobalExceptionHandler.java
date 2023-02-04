@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException e) {
+        log.error("NotFoundException", e);
         final ExceptionResponse response = ExceptionResponse.of(ExceptionCode.NOT_FOUND);
         return new ResponseEntity<>(response, ExceptionCode.NOT_FOUND.getStatus());
     }
