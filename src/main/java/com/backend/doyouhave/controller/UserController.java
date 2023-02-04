@@ -28,8 +28,9 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public Boolean findUsersProfile(@AuthenticationPrincipal UserDetails user) {
-        System.out.println(user);
+    public Boolean findUsersProfile(@AuthenticationPrincipal Long userId) {
+        System.out.println(userId);
+
         return true;
 
     }

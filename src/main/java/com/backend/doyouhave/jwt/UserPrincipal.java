@@ -40,7 +40,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return null;
+        return String.valueOf(userId);
     }
 
     @Override
