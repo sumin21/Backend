@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
@@ -23,20 +24,21 @@ public class PostService {
     private final CloudManager cloudManager;
 
     /* 전단지 작성 */
-    public Post savePost(Long userId, Post savedPost, MultipartFile imageFile) throws IOException {
+    public Long savePost(Post savedPost, MultipartFile imageFile, MultipartFile imageFileSecond) throws IOException {
         // User user = findUser(userId); post.setUser(user); 토큰으로 가져오는 경우 authToken 사용
-        /* 최대 사진 2개 업로드 가능
-        List<Object> multipartFiles = new ArrayList<>();
-        for(MultipartFile imageFile : imageFiles) {
-            multipartFiles.add(imageFile.getBytes());
-        } */
-        Map uploadResult = cloudManager.uploadFile(savedPost.getId(), imageFile,
-                ObjectUtils.asMap("resourcetype", "auto"));
-        // url
-        if(uploadResult!=null) {
-            savedPost.setImg(uploadResult.get("url").toString());
+
+        postRepository.save(savedPost);
+        Map<Object, Map> uploadResultFirst = cloudManager.uploadFile(savedPost.getId(), imageFile);
+        if(uploadResultFirst!=null) {
+            savedPost.setImg(uploadResultFirst.get("url").toString());
         }
-        return postRepository.save(savedPost);
+
+        Map<Object, Map> uploadResultSecond = cloudManager.uploadFile(savedPost.getId(), imageFileSecond);
+        if(uploadResultSecond!=null) {
+            savedPost.setImgSecond(uploadResultSecond.get("url").toString());
+        }
+
+        return savedPost.getId();
     }
 
 //    private User findUser(Long id) {

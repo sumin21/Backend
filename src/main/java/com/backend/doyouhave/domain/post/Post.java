@@ -28,20 +28,29 @@ public class Post extends BaseTimeEntity {
     private String content;
 
     @Column(nullable = false)
-    private String img;
+    private String contactWay;
 
     @Column(nullable = false)
-    private String contactWay;
+    private String category;
+
+    @ElementCollection
+    private List<String> tags = new ArrayList<>();
+
+    @Column(nullable = false)
+    private String img;
+
+    private String imgSecond;
 
     @OneToMany(mappedBy = "post")
     private List<Comment> commentList = new ArrayList<>();
 
-    // private Category category; 태그 포함(String[])
-
-    public void create(String title, String content, String img, String contactWay) {
+    public void create(String title, String content, String contactWay, String category, List<String> tags, String img, String imgSecond) {
         this.title = title;
         this.content = content;
-        this.img = img;
         this.contactWay = contactWay;
+        this.category = category;
+        this.tags = tags;
+        this.img = img;
+        this.imgSecond = imgSecond;
     }
  }
