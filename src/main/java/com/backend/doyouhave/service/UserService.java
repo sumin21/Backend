@@ -4,6 +4,8 @@ import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
+import com.backend.doyouhave.domain.user.dto.UserProfileResponseDto;
+import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.jwt.JwtTokenProvider;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
@@ -50,5 +52,10 @@ public class UserService {
         return LoginResponseDto.from(
                 jwtTokenProvider.createAccessToken(user.getId()),
                 refreshToken);
+    }
+
+    public UserProfileResponseDto findUsersProfile(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException());
+        return UserProfileResponseDto.from(user);
     }
 }
