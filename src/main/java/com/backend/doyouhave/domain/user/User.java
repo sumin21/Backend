@@ -1,12 +1,15 @@
 package com.backend.doyouhave.domain.user;
 
 import com.backend.doyouhave.domain.BaseTimeEntity;
+import com.backend.doyouhave.domain.comment.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Embeddable
 @AllArgsConstructor
@@ -41,6 +44,9 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 
     public static User createKakaoUser(Long kakaoId, String email, String img, String nickname) {
         return User.builder()
