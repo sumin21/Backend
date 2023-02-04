@@ -14,12 +14,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -37,17 +41,15 @@ public class CloudManager {
         cloudinary.config.apiKey = key;
     }
 
-    public Map uploadFile(Long postId, MultipartFile uploadFile, Map options) throws IOException {
+    public Map uploadFile(Long postId, MultipartFile uploadFile) throws IOException {
         String folderName = String.valueOf(postId);
         String fileName = uploadFile.getOriginalFilename();
-        File physicalFile = new File(fileName);
-        FileOutputStream fout = new FileOutputStream(folderName+"/"+physicalFile);
-        fout.write(uploadFile.getBytes());
-        fout.close();
+        String extension = fileName.substring(fileName.lastIndexOf("."), fileName.length());
         try {
-            File toUpload = new File(folderName+"/"+fileName);
-            //Map params = ObjectUtils.asMap("public_id", "AppImages/"+fileName);
-            return cloudinary.uploader().upload(toUpload, options);
+            UUID uuid = UUID.randomUUID();
+            String newFileName = uuid.toString() + extension;
+            Map params = ObjectUtils.asMap("public_id", "Post_"+folderName+"/"+newFileName);
+            return cloudinary.uploader().upload(uploadFile.getBytes(), params);
         } catch(IOException e) {
             e.printStackTrace();
         } finally {
