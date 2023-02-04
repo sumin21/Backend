@@ -38,7 +38,8 @@ public class SecurityConfig {
         return (web) -> web.ignoring().mvcMatchers(
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
-                "/api/users/kakao-login"
+                "/api/users/kakao-login",
+                "/api/auth/token-refresh"
         );
     }
 

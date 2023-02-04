@@ -1,7 +1,9 @@
 package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.user.User;
-import com.backend.doyouhave.exception.SocialLoginException;
+import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
+import com.backend.doyouhave.exception.*;
+import com.backend.doyouhave.jwt.JwtTokenProvider;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
@@ -11,6 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -25,13 +30,15 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Value("${auth.kakao.key}")
     private String authKakaoKey;
 
     @Value("${auth.kakao.redirecturl}")
     private String authKakaoRedirectUrl;
 
-    public String getAccessTokenByCode(String code) {
+    public String getKakaoAccessTokenByCode(String code) {
         String accessToken = "";
         try{
             HttpHeaders headers = new HttpHeaders();
@@ -65,7 +72,7 @@ public class AuthService {
         return accessToken;
     }
 
-    public Optional<User> saveUserInfoByToken(String accessToken) {
+    public Optional<User> saveUserInfoByKakaoToken(String accessToken) {
         try{
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + accessToken);
@@ -94,5 +101,33 @@ public class AuthService {
         } catch (Exception e) {
             throw new SocialLoginException();
         }
+    }
+
+    public LoginResponseDto tokenRefresh(String refreshToken){
+        boolean isValid = jwtTokenProvider.validateToken(refreshToken) == null;
+
+        if (refreshToken == null || !isValid) {
+            throw new BusinessException(ExceptionCode.FAIL_AUTHENTICATION);
+        }
+
+        Long userId = jwtTokenProvider.getJwtTokenPayload(refreshToken);
+        String usersRefreshToken = userRepository.findRefreshTokenById(userId);
+
+        if (!refreshToken.equals(usersRefreshToken)) {
+            throw new BusinessException(ExceptionCode.FAIL_AUTHENTICATION);
+        }
+
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
+        updateRefreshToken(userId, newRefreshToken);
+
+        return LoginResponseDto.from(
+                jwtTokenProvider.createAccessToken(userId),
+                newRefreshToken);
+    }
+
+    public void updateRefreshToken(Long userId, String refreshToken) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException());
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
     }
 }

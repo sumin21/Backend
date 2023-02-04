@@ -19,26 +19,33 @@ public class JwtTokenProvider {
     @Value("${auth.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${auth.jwtExpirationInMs}")
-    private int jwtExpirationInMs;
+    @Value("${auth.jwtExpiration.accessToken}")
+    private int jwtExpirationAccessToken;
 
-    private String createToken(final long payload, final String jwtSecret, final int jwtExpirationInMs) {
+    @Value("${auth.jwtExpiration.refreshToken}")
+    private int jwtExpirationRefreshToken;
+
+    private String createToken(final long payload, final String jwtSecret, final int jwtExpirationAccessToken) {
         return Jwts.builder()
                 .setSubject(String.valueOf(payload))
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationAccessToken))
                 .compact();
     }
 
     public String createAccessToken(final long payload) {
-        return createToken(payload, jwtSecret, jwtExpirationInMs);
+        return createToken(payload, jwtSecret, jwtExpirationAccessToken);
     }
 
-    public Long getAccessTokenPayload(String accessToken) {
+    public String createRefreshToken(final long payload) {
+        return createToken(payload, jwtSecret, jwtExpirationRefreshToken);
+    }
+
+    public Long getJwtTokenPayload(String token) {
         try {
             var claims = Jwts.parser()
                     .setSigningKey(jwtSecret)
-                    .parseClaimsJws(accessToken)
+                    .parseClaimsJws(token)
                     .getBody();
 
             return Long.parseLong(claims.getSubject());
@@ -47,12 +54,12 @@ public class JwtTokenProvider {
         }
     }
 
-    public ExceptionCode validateToken(String accessToken) {
+    public ExceptionCode validateToken(String token) {
         try {
             var claims = Jwts.parser()
                     .setSigningKey(jwtSecret)
-                    .parseClaimsJws(accessToken);
-            if(!claims.getBody().getExpiration().before(new Date()) == false) {
+                    .parseClaimsJws(token);
+            if(claims.getBody().getExpiration().before(new Date())) {
                 return ExceptionCode.FAIL_AUTHENTICATION;
             }
             return null;

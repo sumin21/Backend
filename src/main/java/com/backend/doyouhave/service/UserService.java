@@ -25,14 +25,12 @@ public class UserService {
     public LoginResponseDto signup(Role role, String code) {
 
         if (role.equals(Role.KAKAO)) {
-            String accessToken = authService.getAccessTokenByCode(code);
-            Optional<User> kakaoUser = authService.saveUserInfoByToken(accessToken);
+            String accessToken = authService.getKakaoAccessTokenByCode(code);
+            Optional<User> kakaoUser = authService.saveUserInfoByKakaoToken(accessToken);
             Optional<User> existUser = userRepository.findByRoleAndSocialId(Role.KAKAO, kakaoUser.get().getSocialId());
             if(!existUser.isEmpty()){
-                // exist
                 return login(existUser.get());
             }
-            // signup
             userRepository.save(kakaoUser.get());
             return login(kakaoUser.get());
 
@@ -45,9 +43,8 @@ public class UserService {
     }
 
     public LoginResponseDto login(User user) {
-        // JWT 구현 예정
-
-        String refreshToken = "refreshToken";
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+        authService.updateRefreshToken(user.getId(), refreshToken);
 
         return LoginResponseDto.from(
                 jwtTokenProvider.createAccessToken(user.getId()),

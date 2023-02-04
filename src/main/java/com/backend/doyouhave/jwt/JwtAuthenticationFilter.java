@@ -28,18 +28,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String PREFIX_BEARER = "Bearer ";
     private final UserDetailsService userDetailsService;
-    private final JwtTokenProvider jwtProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
         var accessToken = resolveToken(request);
-        ExceptionCode errorCode = jwtProvider.validateToken(accessToken);
+        ExceptionCode errorCode = jwtTokenProvider.validateToken(accessToken);
 
         if (accessToken != null && errorCode==null) {
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(jwtProvider.getAccessTokenPayload(accessToken)));
+                UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(jwtTokenProvider.getJwtTokenPayload(accessToken)));
                 SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(Long.parseLong(userDetails.getUsername()), "", userDetails.getAuthorities()));
             } catch (Exception e) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
