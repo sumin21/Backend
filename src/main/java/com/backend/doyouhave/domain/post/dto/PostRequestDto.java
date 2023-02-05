@@ -24,7 +24,7 @@ public class PostRequestDto {
     @NotNull
     private String categoryKeyword;
 
-    private List<String> tags = new ArrayList<>();
+    private String tags;
 
     @NotNull
     private String img;
@@ -32,7 +32,7 @@ public class PostRequestDto {
     private String imgSecond;
 
     @Builder
-    public PostRequestDto(String title, String content, String contactWay, String categoryKeyword, List<String> tags,String img, String imgSecond) {
+    public PostRequestDto(String title, String content, String contactWay, String categoryKeyword, String tags,String img, String imgSecond) {
         this.title = title;
         this.content = content;
         this.contactWay = contactWay;

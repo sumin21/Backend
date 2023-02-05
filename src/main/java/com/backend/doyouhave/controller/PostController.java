@@ -1,14 +1,17 @@
 package com.backend.doyouhave.controller;
 
+import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostResponseDto;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.repository.user.UserRepository;
 import com.backend.doyouhave.service.PostService;
+import com.backend.doyouhave.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,7 +26,7 @@ import java.util.Optional;
 @RestController
 public class PostController {
     private final PostService postService;
-    private final UserRepository userRepository;
+    private final UserService userService;
     /* 전단지 작성 API */
     @PostMapping("/posts")
     public ResponseEntity<PostResponseDto> savePost(
@@ -46,11 +49,12 @@ public class PostController {
         return ResponseEntity.created(uri).body(response);
     }
 
-    /* 최근 알림 API
+    /* 최근 알림 API */
     @GetMapping("/mypage/notifications")
-    public ResponseEntity<UserRequestDto> getNotification(
-            @PathVariable Long userId,
-            @RequestBody UserRequestDto userRequestDto) {
-        Optional<User> user = userRepository.findById(userId);
-    } */
+    public ResponseEntity<List<NotificationResponseDto>> getNotification(@PathVariable Long userId) {
+
+        // 댓글 생성시 글 작성자의 알림에 추가하는 로직이 필요
+        List<NotificationResponseDto> notificationResponseDtos = userService.getNotifications(userId);
+        return ResponseEntity.status(200).body(notificationResponseDtos);
+    }
 }
