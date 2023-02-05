@@ -2,6 +2,8 @@ package com.backend.doyouhave.domain.user;
 
 import com.backend.doyouhave.domain.BaseTimeEntity;
 import com.backend.doyouhave.domain.comment.Comment;
+import com.backend.doyouhave.domain.notification.Notification;
+import com.backend.doyouhave.domain.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,6 +52,15 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Notification> notifications = new ArrayList<>();
+    public void setNotification(Notification notification) {
+        this.notifications.add(notification);
+    }
 
     public static User createKakaoUser(Long kakaoId, String email, String img, String nickname) {
         return User.builder()

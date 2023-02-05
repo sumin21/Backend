@@ -1,27 +1,38 @@
 package com.backend.doyouhave.domain.notification;
 
+import com.backend.doyouhave.domain.user.User;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Embeddable
 @Getter
-public class Notification {
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+public class Notification{
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    private String post_title;
+    @Column(nullable = false)
+    private String postTitle;
 
-    private String comment_content;
+    @Column(nullable = false)
+    private String commentContent;
 
+    @Column(nullable = false)
     private LocalDateTime notifiedDate;
 
-    protected Notification() {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    }
-
-    public void create(String post_title, String comment_content) {
-        this.post_title = post_title;
-        this.comment_content = comment_content;
+    public void create(String postTitle, String commentContent) {
+        this.postTitle = postTitle;
+        this.commentContent = commentContent;
         this.notifiedDate = LocalDateTime.now();
     }
 }
