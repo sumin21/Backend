@@ -41,13 +41,27 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public void create(User user, String content) {
+    @Column
+    private boolean isRemoved = false;
+
+    public void createParent(User user, Post post, String content) {
         this.user = user;
+        this.post = post;
         this.content = content;
+    }
+
+    public void createChild(User user, Post post, String content, Comment parent) {
+        this.user = user;
+        this.post = post;
+        this.content = content;
+        this.parent = parent;
     }
 
     public void update(String content) {
         this.content = content;
     }
 
+    public void delete() {
+        this.isRemoved = true;
+    }
 }

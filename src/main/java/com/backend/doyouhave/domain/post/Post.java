@@ -41,7 +41,7 @@ public class Post extends BaseTimeEntity {
 
     private String imgSecond;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
     public void create(String title, String content, String contactWay, String category, List<String> tags, String img, String imgSecond) {

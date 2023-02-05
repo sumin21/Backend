@@ -1,6 +1,7 @@
 package com.backend.doyouhave.domain.comment.dto;
 
 import com.backend.doyouhave.domain.comment.Comment;
+import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,19 +9,37 @@ import lombok.Getter;
 @Getter
 public class CommentRequestDto {
 
-    private final User user;
-    private final String content;
+    private User user;
+    private String content;
+    private Post post;
+    private Comment parent;
 
 
     @Builder
-    public CommentRequestDto(User user, String content) {
+    public CommentRequestDto(User user, Post post, String content) {
         this.user = user;
+        this.post = post;
         this.content = content;
     }
 
-    public Comment toEntity() {
+    @Builder
+    public CommentRequestDto(User user, Post post, String content, Comment parent) {
+        this.user = user;
+        this.post = post;
+        this.content = content;
+        this.parent = parent;
+    }
+
+    public Comment toEntityParent() {
         Comment comment = new Comment();
-        comment.create(user, content);
+        comment.createParent(user, post, content);
+
+        return comment;
+    }
+
+    public Comment toEntityChild() {
+        Comment comment = new Comment();
+        comment.createChild(user, post, content, parent);
 
         return comment;
     }
