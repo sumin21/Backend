@@ -53,11 +53,38 @@ public class CommentService {
     }
 
     /*
+     * 해당 Id를 갖는 댓글
+     * (테스트용 메소드)
+     */
+    public Comment findById(Long commentId) {
+
+        return commentRepository.findById(commentId).orElse(null);
+    }
+
+    /*
+     * 사용자가 작성한 댓글
+     * (테스트용 메소드)
+     */
+    public List<Comment> findByUser(User user) {
+
+        return commentRepository.findByUser(user);
+    }
+
+    /*
      * 사용자가 작성한 댓글
      */
     public Page<MyInfoCommentResponseDto> findByUser(User user, Pageable pageable) {
 
         return commentRepository.findByUser(user, pageable).map(MyInfoCommentResponseDto::new);
+    }
+
+    /*
+     * 전단지에 작성된 댓글
+     * (테스트용 메소드)
+     */
+    public List<Comment> findByPost(Post post) {
+
+        return commentRepository.findByPost(post);
     }
 
     /*
@@ -68,15 +95,15 @@ public class CommentService {
 
         for (Comment comment : commentRepository.findByPost(post)) {
             if (comment.getUser() == writer || comment.getUser() == user) {
-                // 전단지 작성자, 혹은 댓글 작성자일 경우 실제 댓글 내용 조회 가능가
+                // 전단지 작성자, 혹은 댓글 작성자일 경우 실제 댓글 내용 조회 가능
                 commentDtos.add(new CommentResponseDto(comment));
             } else {
                 // 전단지 작성자, 댓글 작성자 둘 다 아니면 실제 댓글 내용이 아닌 "비밀 댓글입니다."로 조회되도록 함
                 Comment newComment = new Comment();
                 if (comment.getParent() == null) {
-                    newComment.createParent(comment.getUser(), post, "비밀댓글입니다.");
+                    newComment.createParent(comment.getUser(), post, comment.getContent(), comment.isSecret());
                 } else {
-                    newComment.createChild(comment.getUser(), post, "비밀댓글입니다.", comment.getParent());
+                    newComment.createChild(comment.getUser(), post, comment.getContent(), comment.getParent(), comment.isSecret());
                 }
                 commentDtos.add(new CommentResponseDto(newComment));
             }
