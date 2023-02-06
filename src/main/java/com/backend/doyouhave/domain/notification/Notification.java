@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Entity
 public class Notification{
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
