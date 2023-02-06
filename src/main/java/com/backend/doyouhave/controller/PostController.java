@@ -5,10 +5,17 @@ import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostResponseDto;
 import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.exception.ExceptionCode;
+import com.backend.doyouhave.exception.ExceptionResponse;
 import com.backend.doyouhave.repository.user.UserRepository;
 import com.backend.doyouhave.service.PostService;
 import com.backend.doyouhave.service.UserService;
+import com.backend.doyouhave.service.result.MultipleResult;
+import com.backend.doyouhave.service.result.ResponseService;
+import com.backend.doyouhave.service.result.Result;
+import com.backend.doyouhave.service.result.SingleResult;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,9 +34,11 @@ import java.util.Optional;
 public class PostController {
     private final PostService postService;
     private final UserService userService;
+    private final ResponseService responseService;
+
     /* 전단지 작성 API */
     @PostMapping("/posts")
-    public ResponseEntity<PostResponseDto> savePost(
+    public ResponseEntity<SingleResult> savePost(
             @PathVariable Long userId,
 //            @AuthenticationPrincipal User user,
             @RequestPart(value="dto") PostRequestDto postRequestDto,
@@ -45,16 +54,27 @@ public class PostController {
                 .buildAndExpand(post.getId())
                 .toUri();
 
-        PostResponseDto response = new PostResponseDto(savedPostId, "200", "이미지가 업로드 되었습니다.");
-        return ResponseEntity.created(uri).body(response);
+        return ResponseEntity.created(uri).body(responseService.getSingleResult(new PostResponseDto(savedPostId)));
+    }
+
+    /* 전단지 삭제 API */
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Result> deletePost(
+            @PathVariable Long userId,
+            @PathVariable Long postId) throws IOException {
+        postService.deletePost(postId);
+        return ResponseEntity.ok(responseService.getSuccessResult());
     }
 
     /* 최근 알림 API */
     @GetMapping("/mypage/notifications")
-    public ResponseEntity<List<NotificationResponseDto>> getNotification(@PathVariable Long userId) {
+    public ResponseEntity<?> getNotification(@PathVariable Long userId) {
 
-        // 댓글 생성시 글 작성자의 알림에 추가하는 로직이 필요
         List<NotificationResponseDto> notificationResponseDtos = userService.getNotifications(userId);
-        return ResponseEntity.status(200).body(notificationResponseDtos);
+        if(notificationResponseDtos == null) {
+            return ResponseEntity.ok(ExceptionResponse.of(ExceptionCode.NOT_FOUND, "알림이 존재하지 않습니다."));
+        }
+
+        return ResponseEntity.ok(responseService.getMultipleResult(notificationResponseDtos));
     }
 }

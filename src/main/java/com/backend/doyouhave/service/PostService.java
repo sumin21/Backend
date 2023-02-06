@@ -2,6 +2,7 @@ package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
+import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.post.CategoryRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.util.CloudManager;
@@ -12,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -52,17 +50,26 @@ public class PostService {
 
         // 클라우디너리에 이미지 저장 및 글 작성 처리
         postRepository.save(savedPost);
-        Map<Object, Map> uploadResultFirst = cloudManager.uploadFile(savedPost.getId(), imageFile);
-        if(uploadResultFirst!=null) {
-            savedPost.setImg(uploadResultFirst.get("url").toString());
-        }
-
-        Map<Object, Map> uploadResultSecond = cloudManager.uploadFile(savedPost.getId(), imageFileSecond);
-        if(uploadResultSecond!=null) {
-            savedPost.setImgSecond(uploadResultSecond.get("url").toString());
-        }
+        cloudManager.uploadFile(savedPost.getId(), imageFile, imageFileSecond, savedPost);
 
         return savedPost.getId();
+    }
+
+    /* 전단지 삭제 */
+    public void deletePost(Long postId) throws IOException {
+        Post foundedPost = postRepository.findById(postId).orElseThrow(
+                () -> new NotFoundException());
+        // 전단지가 삭제되면 해당 카테고리의 태그들도 삭제됨
+        Category categoryResult = categoryRepository.findByKeyword(foundedPost.getCategory());
+        List<String> tags = categoryResult.getTags();
+        List<String> postTags =  Arrays.stream(foundedPost.getTags().split(",")).toList();
+        for(String tag : postTags) {
+            tags.remove(tag);
+        }
+        categoryResult.setCount(categoryResult.getCount() - 1);
+
+        cloudManager.deleteFile(foundedPost, foundedPost.getImg(), foundedPost.getImgSecond());
+        postRepository.delete(foundedPost);
     }
 
 //    private User findUser(Long id) {
