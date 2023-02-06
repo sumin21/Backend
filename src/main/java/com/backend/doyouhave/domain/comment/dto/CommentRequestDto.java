@@ -13,33 +13,36 @@ public class CommentRequestDto {
     private String content;
     private Post post;
     private Comment parent;
+    private boolean isSecret;
 
 
     @Builder
-    public CommentRequestDto(User user, Post post, String content) {
+    public CommentRequestDto(User user, Post post, String content, boolean isSecret) {
         this.user = user;
         this.post = post;
         this.content = content;
+        this.isSecret = isSecret;
     }
 
     @Builder
-    public CommentRequestDto(User user, Post post, String content, Comment parent) {
+    public CommentRequestDto(User user, Post post, String content, Comment parent, boolean isSecret) {
         this.user = user;
         this.post = post;
         this.content = content;
         this.parent = parent;
+        this.isSecret = isSecret;
     }
 
     public Comment toEntityParent() {
         Comment comment = new Comment();
-        comment.createParent(user, post, content);
+        comment.createParent(user, post, content, isSecret);
 
         return comment;
     }
 
     public Comment toEntityChild() {
         Comment comment = new Comment();
-        comment.createChild(user, post, content, parent);
+        comment.createChild(user, post, content, parent, isSecret);
 
         return comment;
     }

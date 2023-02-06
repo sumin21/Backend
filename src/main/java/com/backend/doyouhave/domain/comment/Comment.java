@@ -44,17 +44,22 @@ public class Comment extends BaseTimeEntity {
     @Column
     private boolean isRemoved = false;
 
-    public void createParent(User user, Post post, String content) {
+    @Column
+    private boolean isSecret = false;
+
+    public void createParent(User user, Post post, String content, boolean isSecret) {
         this.user = user;
         this.post = post;
         this.content = content;
+        this.isSecret = isSecret;
     }
 
-    public void createChild(User user, Post post, String content, Comment parent) {
+    public void createChild(User user, Post post, String content, Comment parent, boolean isSecret) {
         this.user = user;
         this.post = post;
         this.content = content;
         this.parent = parent;
+        this.isSecret = isSecret;
     }
 
     public void update(String content) {
@@ -63,5 +68,9 @@ public class Comment extends BaseTimeEntity {
 
     public void delete() {
         this.isRemoved = true;
+    }
+
+    public void conversion() {
+        this.isSecret = true;
     }
 }
