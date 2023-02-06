@@ -4,9 +4,11 @@ import com.backend.doyouhave.domain.comment.Comment;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
 import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.comment.dto.MyInfoCommentResponseDto;
+import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.repository.comment.CommentRepository;
+import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,12 +24,19 @@ import java.util.List;
 @Transactional
 public class CommentService {
 
+    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
 
     /*
      * 원 댓글 생성
      */
     public Long saveParent(CommentRequestDto commentRequestDto) {
+
+        // 알림 로직
+        Notification notification = new Notification();
+        notification.create(commentRequestDto.getPost().getTitle(), commentRequestDto.getContent());
+        commentRequestDto.getPost().getUser().setNotification(notification);
+        userRepository.save(commentRequestDto.getPost().getUser());
 
         return commentRepository.save(commentRequestDto.toEntityParent()).getId();
     }
@@ -36,6 +45,12 @@ public class CommentService {
      * 대댓글 생성
      */
     public Long saveChild(CommentRequestDto commentRequestDto) {
+
+        // 알림 로직
+        Notification notification = new Notification();
+        notification.create(commentRequestDto.getPost().getTitle(), commentRequestDto.getContent());
+        commentRequestDto.getPost().getUser().setNotification(notification);
+        userRepository.save(commentRequestDto.getPost().getUser());
 
         return commentRepository.save(commentRequestDto.toEntityChild()).getId();
     }
