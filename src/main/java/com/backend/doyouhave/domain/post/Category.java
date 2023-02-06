@@ -19,7 +19,7 @@ public class Category {
     @Column(name = "category_id")
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String keyword;
 
     @Column(nullable = false)
