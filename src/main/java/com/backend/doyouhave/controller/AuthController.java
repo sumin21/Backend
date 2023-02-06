@@ -1,11 +1,8 @@
 package com.backend.doyouhave.controller;
 
-import com.backend.doyouhave.domain.user.Role;
-import com.backend.doyouhave.domain.user.dto.LoginRequestDto;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
 import com.backend.doyouhave.domain.user.dto.TokenRefreshRequestDto;
 import com.backend.doyouhave.service.AuthService;
-import com.backend.doyouhave.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

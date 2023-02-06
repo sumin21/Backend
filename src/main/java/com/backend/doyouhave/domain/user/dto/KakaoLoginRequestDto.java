@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class LoginRequestDto {
+public class KakaoLoginRequestDto {
     @NotBlank
     private String code;
 }

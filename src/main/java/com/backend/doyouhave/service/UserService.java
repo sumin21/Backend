@@ -29,7 +29,7 @@ public class UserService {
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginResponseDto signup(Role role, String code) {
+    public LoginResponseDto signup(Role role, String code, String state) {
 
         if (role.equals(Role.KAKAO)) {
             String accessToken = authService.getKakaoAccessTokenByCode(code);
@@ -42,8 +42,14 @@ public class UserService {
             return login(kakaoUser.get());
 
         } else if (role.equals(Role.NAVER)) {
-            // 미구현
-            return null;
+            String accessToken = authService.getNaverAccessTokenByCode(code, state);
+            Optional<User> naverUser = authService.saveUserInfoByNaverToken(accessToken);
+            Optional<User> existUser = userRepository.findByRoleAndSocialId(Role.NAVER, naverUser.get().getSocialId());
+            if(!existUser.isEmpty()){
+                return login(existUser.get());
+            }
+            userRepository.save(naverUser.get());
+            return login(naverUser.get());
         }
 
         return null;
