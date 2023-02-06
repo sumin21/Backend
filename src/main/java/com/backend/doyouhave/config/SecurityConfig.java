@@ -39,6 +39,7 @@ public class SecurityConfig {
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/api/users/kakao-login",
+                "/api/users/naver-login",
                 "/api/auth/token-refresh"
         );
     }

@@ -34,7 +34,7 @@ public class User extends BaseTimeEntity {
     private Long id;
 
     @Column(name = "social_id", nullable = false)
-    private Long socialId;
+    private String socialId;
 
     private String email;
 
@@ -62,7 +62,7 @@ public class User extends BaseTimeEntity {
         this.notifications.add(notification);
     }
 
-    public static User createKakaoUser(Long kakaoId, String email, String img, String nickname) {
+    public static User createKakaoUser(String kakaoId, String email, String img, String nickname) {
         return User.builder()
                 .socialId(kakaoId)
                 .email(email)
@@ -72,7 +72,7 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
-    public static User createNaverUser(Long naverId, String email, String img, String nickname) {
+    public static User createNaverUser(String naverId, String email, String img, String nickname) {
         return User.builder()
                 .socialId(naverId)
                 .email(email)
