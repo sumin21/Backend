@@ -102,7 +102,7 @@ public class AuthService {
             JSONParser parser = new JSONParser();
             JSONObject elem = (JSONObject) parser.parse(response.getBody());
 
-            Long id = (Long) elem.get("id");
+            String id = String.valueOf((Long) elem.get("id"));
             String email = (String) ((JSONObject) elem.get("kakao_account")).get("email");
             String nickname = (String) ((JSONObject) elem.get("properties")).get("nickname");
             String img = (String) ((JSONObject) elem.get("properties")).get("profile_image");
@@ -168,7 +168,7 @@ public class AuthService {
             JSONParser parser = new JSONParser();
             JSONObject elem = (JSONObject) ((JSONObject) parser.parse(response.getBody())).get("response");
             System.out.println("elem = " + elem);
-            Long id = (Long) elem.get("id");
+            String id = (String) elem.get("id");
             String email = (String) elem.get("email");
             String nickname = (String) elem.get("name");
             String img = (String) elem.get("profile_image");
