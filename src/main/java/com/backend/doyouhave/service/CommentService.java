@@ -8,6 +8,7 @@ import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.repository.comment.CommentRepository;
+import com.backend.doyouhave.repository.notification.NotificationRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +27,7 @@ public class CommentService {
 
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-
+    private final NotificationRepository notificationRepository;
     /*
      * 원 댓글 생성
      */
@@ -36,6 +37,7 @@ public class CommentService {
         Notification notification = new Notification();
         notification.create(commentRequestDto.getPost().getTitle(), commentRequestDto.getContent());
         commentRequestDto.getPost().getUser().setNotification(notification);
+        notificationRepository.save(notification);
         userRepository.save(commentRequestDto.getPost().getUser());
 
         return commentRepository.save(commentRequestDto.toEntityParent()).getId();
@@ -50,6 +52,7 @@ public class CommentService {
         Notification notification = new Notification();
         notification.create(commentRequestDto.getPost().getTitle(), commentRequestDto.getContent());
         commentRequestDto.getPost().getUser().setNotification(notification);
+        notificationRepository.save(notification);
         userRepository.save(commentRequestDto.getPost().getUser());
 
         return commentRepository.save(commentRequestDto.toEntityChild()).getId();
