@@ -26,25 +26,19 @@ public class PostRequestDto {
 
     private String tags;
 
-    @NotNull
-    private String img;
-
-    private String imgSecond;
 
     @Builder
-    public PostRequestDto(String title, String content, String contactWay, String categoryKeyword, String tags,String img, String imgSecond) {
+    public PostRequestDto(String title, String content, String contactWay, String categoryKeyword, String tags) {
         this.title = title;
         this.content = content;
         this.contactWay = contactWay;
         this.categoryKeyword = categoryKeyword;
         this.tags = tags;
-        this.img = img;
-        this.imgSecond = imgSecond;
     }
 
     public Post toEntity() {
         Post post = new Post();
-        post.create(title, content, contactWay, categoryKeyword, tags, img, imgSecond);
+        post.create(title, content, contactWay, categoryKeyword, tags);
         return post;
     }
 }

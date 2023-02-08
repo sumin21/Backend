@@ -41,9 +41,10 @@ public class CloudManager {
     public void uploadFile(Long postId, MultipartFile uploadFile, MultipartFile uploadFileSecond, Post savedPost) throws IOException {
         String folderName = String.valueOf(postId);
         try {
-            // 첫번째 사진은 필수, 두번째 사진은 선택
-            String newFileName = getFileUrlByUpload(folderName, uploadFile);
-            savedPost.setImg("http://res.cloudinary.com/do-you-have/image/upload/Post_"+folderName+"/"+newFileName+".jpg");
+            if(uploadFile != null) {
+                String newFileName = getFileUrlByUpload(folderName, uploadFile);
+                savedPost.setImg("http://res.cloudinary.com/do-you-have/image/upload/Post_"+folderName+"/"+newFileName+".jpg");
+            }
 
             if(uploadFileSecond != null) {
                 String newFileNameSecond = getFileUrlByUpload(folderName, uploadFileSecond);
@@ -67,15 +68,19 @@ public class CloudManager {
 
     public void deleteFile(Post foundedPost, String uploadedFile, String uploadedFileSecond) throws IOException {
         String folderName = String.valueOf(foundedPost.getId());
-        String fileName = uploadedFile.substring(uploadedFile.lastIndexOf("/"), uploadedFile.length());
-        System.out.println(fileName);
-        Map options = ObjectUtils.asMap("type", "upload");
-        cloudinary.uploader().destroy("Post_"+folderName+fileName, options);
+        if(uploadedFile!=null) {
+            String fileName = uploadedFile.substring(uploadedFile.lastIndexOf("/"), uploadedFile.length()-4);
+            System.out.println(fileName);
+            Map options = ObjectUtils.asMap("type", "upload");
+            options.put("invalidate", true);
+            cloudinary.uploader().destroy("Post_"+folderName+fileName, options);
+        }
 
         if(uploadedFileSecond!=null) {
-            String fileNameSecond = uploadedFileSecond.substring(uploadedFileSecond.lastIndexOf("/"), uploadedFileSecond.length());
+            String fileNameSecond = uploadedFileSecond.substring(uploadedFileSecond.lastIndexOf("/"), uploadedFileSecond.length()-4);
             System.out.println(fileNameSecond);
             Map optionsSecond = ObjectUtils.asMap("type", "upload");
+            optionsSecond.put("invalidate", true);
             cloudinary.uploader().destroy("Post_"+folderName+fileNameSecond, optionsSecond);
         }
     }
