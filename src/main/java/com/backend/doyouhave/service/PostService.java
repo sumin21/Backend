@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,5 +77,23 @@ public class PostService {
 //        return userRepository.findById(id)
 //                .orElseThrow(() -> new NoSuchElementException("해당 유저가 존재하지 않습니다."));
 //    }
+
+    /* 메인 페이지에 전달되는 전단지 개수 */
+    public Map<String, Integer> findCountPost() {
+        int allCount = 0; // 전체 전단지 개수
+        int todayCount = 0; // 오늘 붙여진 전단지 개수
+
+        for (Post post : postRepository.findAll()) {
+            allCount += 1;
+            if (LocalDate.now().isEqual(post.getCreatedDate().toLocalDate())) {
+                todayCount += 1;
+            }
+        }
+
+        Map<String, Integer> postCounts = new HashMap<>();
+        postCounts.put("allCount", allCount);
+        postCounts.put("todayCount", todayCount);
+        return postCounts;
+    }
 
 }
