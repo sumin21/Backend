@@ -2,6 +2,7 @@ package com.backend.doyouhave.domain.post;
 
 import com.backend.doyouhave.domain.BaseTimeEntity;
 import com.backend.doyouhave.domain.comment.Comment;
+import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,7 +38,6 @@ public class Post extends BaseTimeEntity {
 
     private String tags;
 
-    @Column(nullable = false)
     private String img;
 
     private String imgSecond;
@@ -49,14 +49,20 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
-    public void create(String title, String content, String contactWay, String category, String tags, String img, String imgSecond) {
+    public void create(String title, String content, String contactWay, String category, String tags) {
         this.title = title;
         this.content = content;
         this.contactWay = contactWay;
         this.category = category;
         this.tags = tags;
-        this.img = img;
-        this.imgSecond = imgSecond;
+    }
+
+    public void update(PostUpdateRequestDto entity) {
+        this.title = entity.getTitle();
+        this.content = entity.getContent();
+        this.contactWay = entity.getContactWay();
+        this.category = entity.getCategoryKeyword();
+        this.tags = entity.getTags();
     }
 
     public void setUser(User user) {

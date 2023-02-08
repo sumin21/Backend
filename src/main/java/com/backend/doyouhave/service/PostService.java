@@ -2,6 +2,10 @@ package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
+import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
+import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
+import com.backend.doyouhave.exception.ExceptionCode;
+import com.backend.doyouhave.exception.ExceptionResponse;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.post.CategoryRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
@@ -60,23 +64,69 @@ public class PostService {
     public void deletePost(Long postId) throws IOException {
         Post foundedPost = postRepository.findById(postId).orElseThrow(
                 () -> new NotFoundException());
-        // 전단지가 삭제되면 해당 카테고리의 태그들도 삭제됨
-        Category categoryResult = categoryRepository.findByKeyword(foundedPost.getCategory());
-        List<String> tags = categoryResult.getTags();
-        List<String> postTags =  Arrays.stream(foundedPost.getTags().split(",")).toList();
-        for(String tag : postTags) {
-            tags.remove(tag);
-        }
-        categoryResult.setCount(categoryResult.getCount() - 1);
+        // 전단지가 삭제되면 작성자가 입력한 게시글의 해당 카테고리 태그들도 삭제됨
+        deleteCategoryTags(foundedPost);
 
         cloudManager.deleteFile(foundedPost, foundedPost.getImg(), foundedPost.getImgSecond());
         postRepository.delete(foundedPost);
     }
 
-//    private User findUser(Long id) {
-//        return userRepository.findById(id)
-//                .orElseThrow(() -> new NoSuchElementException("해당 유저가 존재하지 않습니다."));
-//    }
+    /* 전단지 수정 정보 반환 */
+    public PostUpdateResponseDto getPostInfo(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException());
+        PostUpdateResponseDto updateResponse = PostUpdateResponseDto.builder().entity(post).build();
+        return updateResponse;
+    }
+
+    /* 전단지 수정 처리 */
+    public Post updatePost(Long postId, PostUpdateRequestDto updateRequestDto,
+                           MultipartFile updateImage, MultipartFile updateImageSecond) throws IOException {
+            Post foundedPost = postRepository.findById(postId)
+                    .orElseThrow(() -> new NotFoundException());
+            // 카테고리 테이블에 존재하는 태그 수정 처리
+            deleteCategoryTags(foundedPost);
+            updateCategoryTags(updateRequestDto);
+
+            String beforeImage = foundedPost.getImg();
+            String beforeImageSecond = foundedPost.getImgSecond();
+            cloudManager.uploadFile(postId, updateImage, updateImageSecond, foundedPost);
+            cloudManager.deleteFile(foundedPost, beforeImage, beforeImageSecond);
+
+            foundedPost.update(updateRequestDto);
+            return postRepository.save(foundedPost);
+    }
+
+    /* 삭제한 게시글의 카테고리 태그 삭제 (카테고리는 고정되어 있으므로 태그만 삭제 처리) */
+    private void deleteCategoryTags(Post foundedPost) {
+        Category beforeCategory = categoryRepository.findByKeyword(foundedPost.getCategory());
+        List<String> tags = beforeCategory.getTags();
+        List<String> postTags =  Arrays.stream(foundedPost.getTags().split(",")).toList();
+        for(String tag : postTags) {
+            tags.remove(tag);
+        }
+        beforeCategory.setCount(beforeCategory.getCount() - 1);
+    }
+
+    /* 업데이트한 게시글의 카테고리 태그 수정 */
+    private void updateCategoryTags(PostUpdateRequestDto updateRequestDto) {
+        Category afterCategory = categoryRepository.findByKeyword(updateRequestDto.getCategoryKeyword());
+        if(afterCategory == null) {
+            List<String> tagList = Arrays.stream(updateRequestDto.getTags().split(",")).toList();
+            afterCategory = Category.builder()
+                    .keyword(updateRequestDto.getCategoryKeyword())
+                    .count(0)
+                    .tags(tagList)
+                    .build();
+        } else {
+            List<String> newTags = afterCategory.getTags();
+            List<String> updatedTags =  Arrays.stream(updateRequestDto.getTags().split(",")).toList();
+            for(String tag : updatedTags) {
+                newTags.add(tag);
+            }
+        }
+        afterCategory.setCount(afterCategory.getCount() + 1);
+        categoryRepository.save(afterCategory);
+    }
 
     /* 메인 페이지에 전달되는 전단지 개수 */
     public Map<String, Integer> findCountPost() {
