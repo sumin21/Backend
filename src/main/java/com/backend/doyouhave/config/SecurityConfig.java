@@ -32,12 +32,14 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring().mvcMatchers(
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
+                "/swagger-resources/**",
+                "/configuration/**",
+                "/webjars/**",
                 "/api/users/kakao-login",
                 "/api/users/naver-login",
                 "/api/auth/token-refresh"
@@ -52,7 +54,7 @@ public class SecurityConfig {
 
                 .authorizeRequests()
                 .antMatchers("/api/admins/**").hasRole("ADMIN")
-                .antMatchers().permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
 
