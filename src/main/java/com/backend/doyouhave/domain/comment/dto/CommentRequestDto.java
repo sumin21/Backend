@@ -12,7 +12,7 @@ public class CommentRequestDto {
     private User user;
     private String content;
     private Post post;
-    private Comment parent;
+    private CommentRequestDto parent;
     private boolean isSecret;
 
 
@@ -25,7 +25,7 @@ public class CommentRequestDto {
     }
 
     @Builder
-    public CommentRequestDto(User user, Post post, String content, Comment parent, boolean isSecret) {
+    public CommentRequestDto(User user, Post post, String content, CommentRequestDto parent, boolean isSecret) {
         this.user = user;
         this.post = post;
         this.content = content;
@@ -42,7 +42,7 @@ public class CommentRequestDto {
 
     public Comment toEntityChild() {
         Comment comment = new Comment();
-        comment.createChild(user, post, content, parent, isSecret);
+        comment.createChild(user, post, content, parent.toEntityParent(), isSecret);
 
         return comment;
     }
