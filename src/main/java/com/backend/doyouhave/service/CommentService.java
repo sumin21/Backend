@@ -7,6 +7,7 @@ import com.backend.doyouhave.domain.comment.dto.MyInfoCommentResponseDto;
 import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.comment.CommentRepository;
 import com.backend.doyouhave.repository.notification.NotificationRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
@@ -64,7 +65,7 @@ public class CommentService {
     public void update(Long commentId, CommentRequestDto commentRequestDto) {
         // 수정하려는 댓글이 없을 경우 IllegalArgumentException 발생
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다. id=" + commentId));
+                .orElseThrow(NotFoundException::new);
 
         comment.update(commentRequestDto.getContent());
         commentRepository.save(comment);
@@ -91,7 +92,10 @@ public class CommentService {
     /*
      * 사용자가 작성한 댓글
      */
-    public Page<MyInfoCommentResponseDto> findByUser(User user, Pageable pageable) {
+    public Page<MyInfoCommentResponseDto> findByUser(Long userId, Pageable pageable) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(NotFoundException::new);
 
         return commentRepository.findByUser(user, pageable).map(MyInfoCommentResponseDto::new);
     }
@@ -136,7 +140,7 @@ public class CommentService {
      */
     public void delete(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다. id=" + commentId));
+                .orElseThrow(NotFoundException::new);
         comment.delete();
         commentRepository.save(comment);
     }
