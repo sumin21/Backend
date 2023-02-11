@@ -42,6 +42,11 @@ public class Post extends BaseTimeEntity {
 
     private String imgSecond;
 
+    private long viewCount;
+
+    // 댓글 수 기준 정렬시 사용(성능 측면에서 조인보다 필드 정렬이 효율적)
+    private long commentNum;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -55,6 +60,8 @@ public class Post extends BaseTimeEntity {
         this.contactWay = contactWay;
         this.category = category;
         this.tags = tags;
+        this.viewCount = 0; // 전단지 첫 생성시 조회수 0으로 초기화, 상세정보 클릭시 카운팅
+        this.commentNum = this.getCommentList().size();
     }
 
     public void update(PostUpdateRequestDto entity) {
@@ -68,5 +75,9 @@ public class Post extends BaseTimeEntity {
     public void setUser(User user) {
         user.getPosts().add(this);
         this.user = user;
+    }
+
+    public void remove(User user) {
+        user.getPosts().remove(this);
     }
  }

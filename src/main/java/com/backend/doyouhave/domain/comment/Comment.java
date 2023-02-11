@@ -68,9 +68,17 @@ public class Comment extends BaseTimeEntity {
 
     public void delete() {
         this.isRemoved = true;
+        this.getPost().getCommentList().remove(this);
+        this.getPost().setCommentNum(this.getPost().getCommentList().size() - 1);
     }
 
     public void conversion() {
         this.isSecret = true;
+    }
+
+    public void setPost(Post post) {
+        post.getCommentList().add(this);
+        post.setCommentNum(post.getCommentList().size() + 1);
+        this.post = post;
     }
 }

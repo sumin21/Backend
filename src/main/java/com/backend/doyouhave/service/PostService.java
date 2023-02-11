@@ -4,13 +4,10 @@ import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
-import com.backend.doyouhave.exception.ExceptionCode;
-import com.backend.doyouhave.exception.ExceptionResponse;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.post.CategoryRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.util.CloudManager;
-import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +22,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class PostService {
-
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final CloudManager cloudManager;
@@ -36,8 +32,8 @@ public class PostService {
         // savedPost.setUser(user);
         // 카테고리 별로 태그 저장. 카테고리가 기존에 존재하는 키워드라면 해당 카테고리에 속하는 태그들을 추가하는 방식
         Category categoryResult = categoryRepository.findByKeyword(savedPost.getCategory());
-        if(categoryResult == null) {
-            List<String> tagList =  Arrays.stream(savedPost.getTags().split(",")).toList();
+        if (categoryResult == null) {
+            List<String> tagList = Arrays.stream(savedPost.getTags().split(",")).toList();
             categoryResult = Category.builder()
                     .keyword(savedPost.getCategory())
                     .count(0)
@@ -45,8 +41,8 @@ public class PostService {
                     .build();
         } else {
             List<String> tags = categoryResult.getTags();
-            List<String> postTags =  Arrays.stream(savedPost.getTags().split(",")).toList();
-            for(String tag : postTags) {
+            List<String> postTags = Arrays.stream(savedPost.getTags().split(",")).toList();
+            for (String tag : postTags) {
                 tags.add(tag);
             }
         }
@@ -66,7 +62,7 @@ public class PostService {
                 () -> new NotFoundException());
         // 전단지가 삭제되면 작성자가 입력한 게시글의 해당 카테고리 태그들도 삭제됨
         deleteCategoryTags(foundedPost);
-
+        // foundedPost.remove(user);
         cloudManager.deleteFile(foundedPost, foundedPost.getImg(), foundedPost.getImgSecond());
         postRepository.delete(foundedPost);
     }
@@ -81,27 +77,27 @@ public class PostService {
     /* 전단지 수정 처리 */
     public Post updatePost(Long postId, PostUpdateRequestDto updateRequestDto,
                            MultipartFile updateImage, MultipartFile updateImageSecond) throws IOException {
-            Post foundedPost = postRepository.findById(postId)
-                    .orElseThrow(() -> new NotFoundException());
-            // 카테고리 테이블에 존재하는 태그 수정 처리
-            deleteCategoryTags(foundedPost);
-            updateCategoryTags(updateRequestDto);
+        Post foundedPost = postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException());
+        // 카테고리 테이블에 존재하는 태그 수정 처리
+        deleteCategoryTags(foundedPost);
+        updateCategoryTags(updateRequestDto);
 
-            String beforeImage = foundedPost.getImg();
-            String beforeImageSecond = foundedPost.getImgSecond();
-            cloudManager.uploadFile(postId, updateImage, updateImageSecond, foundedPost);
-            cloudManager.deleteFile(foundedPost, beforeImage, beforeImageSecond);
+        String beforeImage = foundedPost.getImg();
+        String beforeImageSecond = foundedPost.getImgSecond();
+        cloudManager.uploadFile(postId, updateImage, updateImageSecond, foundedPost);
+        cloudManager.deleteFile(foundedPost, beforeImage, beforeImageSecond);
 
-            foundedPost.update(updateRequestDto);
-            return postRepository.save(foundedPost);
+        foundedPost.update(updateRequestDto);
+        return postRepository.save(foundedPost);
     }
 
     /* 삭제한 게시글의 카테고리 태그 삭제 (카테고리는 고정되어 있으므로 태그만 삭제 처리) */
     private void deleteCategoryTags(Post foundedPost) {
         Category beforeCategory = categoryRepository.findByKeyword(foundedPost.getCategory());
         List<String> tags = beforeCategory.getTags();
-        List<String> postTags =  Arrays.stream(foundedPost.getTags().split(",")).toList();
-        for(String tag : postTags) {
+        List<String> postTags = Arrays.stream(foundedPost.getTags().split(",")).toList();
+        for (String tag : postTags) {
             tags.remove(tag);
         }
         beforeCategory.setCount(beforeCategory.getCount() - 1);
@@ -110,7 +106,7 @@ public class PostService {
     /* 업데이트한 게시글의 카테고리 태그 수정 */
     private void updateCategoryTags(PostUpdateRequestDto updateRequestDto) {
         Category afterCategory = categoryRepository.findByKeyword(updateRequestDto.getCategoryKeyword());
-        if(afterCategory == null) {
+        if (afterCategory == null) {
             List<String> tagList = Arrays.stream(updateRequestDto.getTags().split(",")).toList();
             afterCategory = Category.builder()
                     .keyword(updateRequestDto.getCategoryKeyword())
@@ -119,8 +115,8 @@ public class PostService {
                     .build();
         } else {
             List<String> newTags = afterCategory.getTags();
-            List<String> updatedTags =  Arrays.stream(updateRequestDto.getTags().split(",")).toList();
-            for(String tag : updatedTags) {
+            List<String> updatedTags = Arrays.stream(updateRequestDto.getTags().split(",")).toList();
+            for (String tag : updatedTags) {
                 newTags.add(tag);
             }
         }
@@ -146,4 +142,14 @@ public class PostService {
         return postCounts;
     }
 
+    /* 인기 태그 상위 5개 조회 */
+    public List<String> findTopTags(String category) {
+        List<String> topTags = null;
+        if(category == null) {
+            topTags = categoryRepository.findTop5ByTags();
+        } else {
+            topTags = categoryRepository.findTop5ByCategoryAndTags(category);
+        }
+        return topTags;
+    }
 }

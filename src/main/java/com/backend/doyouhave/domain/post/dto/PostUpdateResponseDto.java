@@ -1,6 +1,7 @@
 package com.backend.doyouhave.domain.post.dto;
 
 import com.backend.doyouhave.domain.post.Post;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,14 +14,15 @@ import java.util.List;
 @NoArgsConstructor
 public class PostUpdateResponseDto {
 
+    @ApiModelProperty(value = "고민이 있어요")
     private String title;
-
+    @ApiModelProperty(value = "테스트")
     private String content;
-
+    @ApiModelProperty(value = "Google Form")
     private String contactWay;
-
+    @ApiModelProperty(value = "MEDICAL")
     private String categoryKeyword;
-
+    @ApiModelProperty(value = "['test1', 'test2', 'test3']")
     private List<String> tags;
 
     private String img;
