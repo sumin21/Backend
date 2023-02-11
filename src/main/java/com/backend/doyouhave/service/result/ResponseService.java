@@ -1,5 +1,6 @@
 package com.backend.doyouhave.service.result;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,13 @@ public class ResponseService {
         MultipleResult<T> result = new MultipleResult<>();
         setSuccessResult(result);
         result.setData(data);
+        return result;
+    }
+
+    public <T> MultiplePageResult<T> getMultiplePageResult(Page<T> data) {
+        MultiplePageResult<T> result = new MultiplePageResult<>();
+        setSuccessResult(result);
+        result.setPageData(data);
         return result;
     }
 

@@ -1,6 +1,8 @@
 package com.backend.doyouhave.domain.post.dto;
 
 import com.backend.doyouhave.domain.post.Post;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,16 +16,19 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class PostRequestDto {
-
+    @ApiModelProperty(value = "고민이 있어요")
     @NotNull
     private String title;
+    @ApiModelProperty(value = "테스트 내용")
     @NotNull
     private String content;
+    @ApiModelProperty(value = "kakaotalk")
     @NotNull
     private String contactWay;
+    @ApiModelProperty(value = "공부")
     @NotNull
     private String categoryKeyword;
-
+    @ApiModelProperty(value = "스프링,자바,프로젝트")
     private String tags;
 
 

@@ -35,6 +35,7 @@ public class CommentRequestDto {
 
     public Comment toEntityParent() {
         Comment comment = new Comment();
+        comment.setPost(post);
         comment.createParent(user, post, content, isSecret);
 
         return comment;
@@ -42,6 +43,7 @@ public class CommentRequestDto {
 
     public Comment toEntityChild() {
         Comment comment = new Comment();
+        comment.setPost(post);
         comment.createChild(user, post, content, parent.toEntityParent(), isSecret);
 
         return comment;
