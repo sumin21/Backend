@@ -23,7 +23,7 @@ import java.util.Map;
 public class PostFilterService {
     private final PostRepository postRepository;
 
-    /* 전단지 골목 페이지에서 카테고리 또는 태그에 따라 전단지 리스트 반환 */
+    /* 전단지 골목 페이지에서 카테고리 또는 태그에 따라 전단지 기본 정보 리스트 반환 */
     public Page<PostListResponseDto> findPostByCategoryOrTags(String category, String tag, String sort, Pageable pageable) {
         Page<PostListResponseDto> postResultList = null;
         Map<String, SortWay> sortTypeMap = new HashMap<>();
@@ -35,6 +35,22 @@ public class PostFilterService {
         sortTypeMap.put("COMMENT", new CommentCount(postRepository));
         postResultList = sortTypeMap.get(sort).findPostBySortType(category, tag, pageable);
 
+        return postResultList;
+    }
+
+    /* 제목 기준 전단지 검색용 */
+    public Page<PostListResponseDto> findPostByCategoryAndSearch(String category, String search, String sort, Pageable pageable) {
+        Page<PostListResponseDto> postResultList = null;
+        try {
+            PageRequest request
+                    = sort == null || sort.equals("DATE") ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdDate"))
+                    : sort.equals("VIEW") ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "viewCount"))
+                    : sort.equals("COMMENT") ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "commentNum")) : null;
+
+            postResultList = postRepository.findByCategoryAndTitleContainingOrContentContaining(category, search, search, request).map(PostListResponseDto::new);
+        } catch (NoSuchFieldError e) {
+            e.printStackTrace();
+        }
         return postResultList;
     }
 
