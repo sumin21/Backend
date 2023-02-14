@@ -40,7 +40,7 @@ public class MainController {
         return ResponseEntity.ok(responseService.getSingleResult(new MainInfoDto(countPost.get("allCount"), countPost.get("todayCount"))));
     }
 
-    /* 전단지 조회 API */
+    /* 전단지 조회 API (+ 검색) */
     @GetMapping("/list")
     @ApiOperation(value = "전단지 리스트", notes = "선택한 카테고리 및 정렬순에 따라 전단지를 보여준다.")
     @ApiResponses({
@@ -52,10 +52,13 @@ public class MainController {
             @PathVariable Long userId,
             @RequestParam(name="category", required = false) String category,
             @RequestParam(name="tag", required = false) String tag,
+            @RequestParam(name="search", required = false) String search,
             @RequestParam(name="sort", required = false) String sort,
             @PageableDefault(size=20) Pageable pageable) {
 
-        Page<PostListResponseDto> response = postFilterService.findPostByCategoryOrTags(category, tag, sort, pageable);
+        // 검색했을 때와 검색하지 않았을 때를 구분
+        Page<PostListResponseDto> response = search == null ? postFilterService.findPostByCategoryOrTags(category, tag, sort, pageable) :
+                                                                postFilterService.findPostByCategoryAndSearch(category, search, sort, pageable);
         return ResponseEntity.ok(responseService.getMultiplePageResult(response));
     }
 
