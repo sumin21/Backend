@@ -12,19 +12,11 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    /* 최근 작성일 기준 */
+    /* 카테고리, 태그 및 정렬별 전단지 조회  */
     Page<Post> findAll(Pageable pageable);
     Page<Post> findByCategoryAndTagsContaining(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
     Page<Post> findByCategoryOrTagsContaining(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
 
-    /* 조회수 기준 */
-    Page<Post> findAllByOrderByViewCountDesc(Pageable pageable);
-    Page<Post> findByCategoryAndTagsContainingOrderByViewCountDesc(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
-    Page<Post> findByCategoryOrTagsContainingOrderByViewCountDesc(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
-
-    /* 댓글 수 기준 */
-    Page<Post> findAllByOrderByCommentNumDesc(Pageable pageable);
-    Page<Post> findByCategoryAndTagsContainingOrderByCommentNumDesc(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
-    Page<Post> findByCategoryOrTagsContainingOrderByCommentNumDesc(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
-
+    /* 전단지 검색 조회 */
+    Page<Post> findByCategoryAndTitleContainingOrContentContaining(@Param("keyword") String keyword, @Param("search") String title, @Param("search") String content, Pageable pageable);
 }

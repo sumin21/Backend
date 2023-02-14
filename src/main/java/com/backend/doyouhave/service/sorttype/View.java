@@ -14,14 +14,14 @@ public class View implements SortWay {
     @Override
     public Page<PostListResponseDto> findPostBySortType(String category, String tag, Pageable pageable) {
         PageRequest request = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "viewCount"));
-        pageable = request;
+
         Page<PostListResponseDto> pageList = null;
         if(category==null && tag == null) {
-            pageList = postRepository.findAllByOrderByViewCountDesc(pageable).map(PostListResponseDto::new);
+            pageList = postRepository.findAll(request).map(PostListResponseDto::new);
         } else if(category!=null && tag != null) {
-            pageList  = postRepository.findByCategoryAndTagsContainingOrderByViewCountDesc(category, tag, pageable).map(PostListResponseDto::new);
+            pageList  = postRepository.findByCategoryAndTagsContaining(category, tag, request).map(PostListResponseDto::new);
         } else {
-            pageList = postRepository.findByCategoryOrTagsContainingOrderByViewCountDesc(category, tag, pageable).map(PostListResponseDto::new);
+            pageList = postRepository.findByCategoryOrTagsContaining(category, tag, request).map(PostListResponseDto::new);
         }
         return pageList;
     }

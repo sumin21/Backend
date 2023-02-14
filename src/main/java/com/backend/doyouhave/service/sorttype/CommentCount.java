@@ -14,15 +14,14 @@ public class CommentCount implements SortWay{
     @Override
     public Page<PostListResponseDto> findPostBySortType(String category, String tag, Pageable pageable) {
         PageRequest request = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "commentNum"));
-        pageable = request;
 
         Page<PostListResponseDto> pageList = null;
         if (category == null && tag == null) {
-            pageList = postRepository.findAllByOrderByCommentNumDesc(pageable).map(PostListResponseDto::new);
+            pageList = postRepository.findAll(request).map(PostListResponseDto::new);
         } else if (category != null && tag != null) {
-            pageList = postRepository.findByCategoryAndTagsContainingOrderByCommentNumDesc(category, tag, pageable).map(PostListResponseDto::new);
+            pageList = postRepository.findByCategoryAndTagsContaining(category, tag, request).map(PostListResponseDto::new);
         } else {
-            pageList = postRepository.findByCategoryOrTagsContainingOrderByCommentNumDesc(category, tag, pageable).map(PostListResponseDto::new);
+            pageList = postRepository.findByCategoryOrTagsContaining(category, tag, request).map(PostListResponseDto::new);
         }
         return pageList;
     }
