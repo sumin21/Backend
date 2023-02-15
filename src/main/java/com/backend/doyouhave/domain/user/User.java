@@ -62,6 +62,9 @@ public class User extends BaseTimeEntity {
         this.notifications.add(notification);
     }
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserLikes> userLikes = new ArrayList<>();
+
     public static User createKakaoUser(String kakaoId, String email, String img, String nickname) {
         return User.builder()
                 .socialId(kakaoId)

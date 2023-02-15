@@ -4,6 +4,7 @@ import com.backend.doyouhave.domain.BaseTimeEntity;
 import com.backend.doyouhave.domain.comment.Comment;
 import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.domain.user.UserLikes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -53,6 +54,9 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<UserLikes> userLikes = new ArrayList<>();
 
     public void create(String title, String content, String contactWay, String category, String tags) {
         this.title = title;
