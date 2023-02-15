@@ -5,9 +5,13 @@ import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
+import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.domain.user.UserLikes;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.post.CategoryRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
+import com.backend.doyouhave.repository.user.UserLikesRepository;
+import com.backend.doyouhave.repository.user.UserRepository;
 import com.backend.doyouhave.util.CloudManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +31,8 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
+    private final UserLikesRepository userLikesRepository;
+    private final UserRepository userRepository;
     private final CloudManager cloudManager;
 
     /* 전단지 작성 */
@@ -160,8 +166,28 @@ public class PostService {
     public Page<PostListResponseDto> findUsersPostByUserId(Long userId, Pageable pageable) {
         Page<PostListResponseDto> postResultList = null;
 
-        postResultList = postRepository.findByUserId(userId, pageable).map(PostListResponseDto::new);;
+        postResultList = postRepository.findByUserId(userId, pageable).map(PostListResponseDto::new);
 
         return postResultList;
+    }
+
+    /* 북마크 처리 (상세 정보 dto에서도 북마크 여부 반환 필요) */
+    public void markPost(Long postId, Long userId, boolean mark) {
+
+        User user =  userRepository.findById(userId).orElseThrow();
+        Post markedPost = postRepository.findById(postId).orElseThrow();
+
+        UserLikes userLikes = UserLikes.builder()
+                                        .markedUser(user)
+                                        .markedPost(markedPost)
+                                        .build();
+        if(mark == false) {
+            userLikes.setUser(user);
+            userLikes.setPost(markedPost);
+            userLikesRepository.save(userLikes);
+        } else {
+            userLikes.deleteUserAndPost(user, markedPost);
+            userLikesRepository.delete(userLikes);
+        }
     }
 }

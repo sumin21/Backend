@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users/{userId}")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class MainController {
 
@@ -49,7 +49,6 @@ public class MainController {
             @ApiResponse(code = 404, message = "잘못된 요청입니다.")
     })
     public ResponseEntity<MultiplePageResult> postListUp(
-            @PathVariable Long userId,
             @RequestParam(name="category", required = false) String category,
             @RequestParam(name="tag", required = false) String tag,
             @RequestParam(name="search", required = false) String search,
@@ -65,7 +64,6 @@ public class MainController {
     /* 인기 태그 조회 API */
     @GetMapping("/list/top")
     public ResponseEntity<MultipleResult> postTop5Tag(
-            @PathVariable Long userId,
             @RequestParam(name="category", required = false) String category) {
         List<String> topTags = postService.findTopTags(category);
         return ResponseEntity.ok(responseService.getMultipleResult(topTags));
