@@ -19,4 +19,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     /* 전단지 검색 조회 */
     Page<Post> findByCategoryAndTitleContainingOrContentContaining(@Param("keyword") String keyword, @Param("search") String title, @Param("search") String content, Pageable pageable);
+
+    Page<Post> findByUserId(@Param("userId") Long userId, Pageable pageable);
+
 }
