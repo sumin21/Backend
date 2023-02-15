@@ -2,6 +2,7 @@ package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
+import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
 import com.backend.doyouhave.exception.NotFoundException;
@@ -9,6 +10,8 @@ import com.backend.doyouhave.repository.post.CategoryRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.util.CloudManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -151,5 +154,14 @@ public class PostService {
             topTags = categoryRepository.findTop5ByCategoryAndTags(category);
         }
         return topTags;
+    }
+
+    /* 마이페이지에서 사용자가 작성한 전단지 목록 반환 */
+    public Page<PostListResponseDto> findUsersPostByUserId(Long userId, Pageable pageable) {
+        Page<PostListResponseDto> postResultList = null;
+
+        postResultList = postRepository.findByUserId(userId, pageable).map(PostListResponseDto::new);;
+
+        return postResultList;
     }
 }
