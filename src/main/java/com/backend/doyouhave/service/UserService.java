@@ -3,6 +3,7 @@ package com.backend.doyouhave.service;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
 import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
+import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
@@ -13,6 +14,8 @@ import com.backend.doyouhave.repository.notification.NotificationRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final PostRepository postRepository;
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -77,10 +81,14 @@ public class UserService {
                 .stream()
                 .map(NotificationResponseDto::new)
                 .collect(Collectors.toList());
-        if(notificationResponseDtos.isEmpty()) {
-            return null;
-        } else {
-            return notificationResponseDtos;
-        }
+        return notificationResponseDtos;
+    }
+
+    // 회원의 북마크 전단지 목록 반환
+    public Page<PostListResponseDto> marksList(Long userId, Pageable pageable) {
+        Page<PostListResponseDto> markedPostResponseDtos = postRepository
+                .findMarkedPostByUserId(userId, pageable)
+                .map(PostListResponseDto::new);
+        return markedPostResponseDtos;
     }
 }

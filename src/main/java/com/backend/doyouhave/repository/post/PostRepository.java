@@ -22,4 +22,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
+    /* 북마크한 전단지 조회 */
+    @Query(value = "select * from Post p left join user_likes u on p.post_id = u.post_id where u.user_id = :userId order by u.created_date desc", nativeQuery = true)
+    Page<Post> findMarkedPostByUserId(@Param("userId") Long userId, Pageable pageable);
 }
