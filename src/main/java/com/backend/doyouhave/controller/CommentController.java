@@ -32,28 +32,23 @@ import java.net.URI;
 public class CommentController {
 
     private final CommentService commentService;
-    private final PostService postService;
-    private final UserService userService;
     private final ResponseService responseService;
 
     /* 댓글 생성 API */
     @PostMapping("/posts/{postId}")
-    @ApiOperation(value = "댓글 생성", response = CommentResponseDto.class)
-    public ResponseEntity<SingleResult> saveComment(@PathVariable("postId") Long postId,
+    @ApiOperation(value = "댓글 생성")
+    public ResponseEntity<SingleResult<PostResponseDto>> saveComment(@PathVariable("postId") Long postId,
+                                                                     @AuthenticationPrincipal Long userId,
                                                     @RequestBody CommentRequestDto commentRequestDto) {
-        if (commentRequestDto.getParent() == null) {
-            commentService.saveParent(commentRequestDto);
-        } else {
-            commentService.saveChild(commentRequestDto);
-        }
+        commentService.save(commentRequestDto, userId, postId);
 
         return ResponseEntity.ok(responseService.getSingleResult(new PostResponseDto(postId)));
     }
 
     /* 댓글 수정 API */
     @PostMapping("/posts/{postId}/{commentId}")
-    @ApiOperation(value = "댓글 수정", response = CommentResponseDto.class)
-    public ResponseEntity<SingleResult> updateComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
+    @ApiOperation(value = "댓글 수정", response = SingleResult.class)
+    public ResponseEntity<SingleResult<PostResponseDto>> updateComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
                                                       @RequestBody CommentRequestDto commentRequestDto) {
         commentService.update(commentId, commentRequestDto);
 
@@ -65,8 +60,8 @@ public class CommentController {
 
     /* 댓글 삭제 API */
     @DeleteMapping("/posts/{postId}/{commentId}")
-    @ApiOperation(value = "댓글 삭제", response = CommentResponseDto.class)
-    public ResponseEntity<SingleResult> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
+    @ApiOperation(value = "댓글 삭제", response = SingleResult.class)
+    public ResponseEntity<SingleResult<PostResponseDto>> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
 
         commentService.delete(commentId);
 
@@ -79,7 +74,7 @@ public class CommentController {
     /* 내가 쓴 댓글 API */
     @GetMapping("/myInfo/comment")
     @ApiOperation(value = "내가 쓴 댓글", notes = "내가 쓴 댓글 목록 출력", response = MyInfoCommentResponseDto.class)
-    public ResponseEntity<?> myComments(@PathVariable("userId") Long userId, @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> myComments(@AuthenticationPrincipal Long userId, @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(commentService.findByUser(userId, pageable));
     }
