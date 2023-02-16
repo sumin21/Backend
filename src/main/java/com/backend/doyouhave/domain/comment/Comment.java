@@ -26,12 +26,8 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Comment parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Comment> children = new ArrayList<>();
+    @Column
+    private Long parentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -47,18 +43,11 @@ public class Comment extends BaseTimeEntity {
     @Column
     private boolean isSecret = false;
 
-    public void createParent(User user, Post post, String content, boolean isSecret) {
+    public void  create(User user, Post post, String content, Long parentId, boolean isSecret) {
         this.user = user;
         this.post = post;
         this.content = content;
-        this.isSecret = isSecret;
-    }
-
-    public void createChild(User user, Post post, String content, Comment parent, boolean isSecret) {
-        this.user = user;
-        this.post = post;
-        this.content = content;
-        this.parent = parent;
+        this.parentId = parentId;
         this.isSecret = isSecret;
     }
 
