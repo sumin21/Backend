@@ -10,6 +10,7 @@ import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.comment.CommentRepository;
 import com.backend.doyouhave.repository.notification.NotificationRepository;
+import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,34 +30,18 @@ public class CommentService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final NotificationRepository notificationRepository;
-    /*
-     * 원 댓글 생성
-     */
-    public Long saveParent(CommentRequestDto commentRequestDto) {
-
-        // 알림 로직
-        Notification notification = new Notification();
-        notification.create(commentRequestDto.getPost().getTitle(), commentRequestDto.getContent());
-        commentRequestDto.getPost().getUser().setNotification(notification);
-        notificationRepository.save(notification);
-        userRepository.save(commentRequestDto.getPost().getUser());
-
-        return commentRepository.save(commentRequestDto.toEntityParent()).getId();
-    }
+    private final PostRepository postRepository;
 
     /*
-     * 대댓글 생성
+     * 댓글 생성
      */
-    public Long saveChild(CommentRequestDto commentRequestDto) {
+    public Long save(CommentRequestDto commentRequestDto, Long userId, Long postId) {
 
         // 알림 로직
-        Notification notification = new Notification();
-        notification.create(commentRequestDto.getPost().getTitle(), commentRequestDto.getContent());
-        commentRequestDto.getPost().getUser().setNotification(notification);
-        notificationRepository.save(notification);
-        userRepository.save(commentRequestDto.getPost().getUser());
+        setNotification(postId, commentRequestDto);
 
-        return commentRepository.save(commentRequestDto.toEntityChild()).getId();
+        return commentRepository.save(commentRequestDto.toEntity(userRepository.findById(userId).orElseThrow(NotFoundException::new),
+                postRepository.findById(postId).orElseThrow(NotFoundException::new))).getId();
     }
 
     /*
@@ -116,19 +101,7 @@ public class CommentService {
         List<CommentResponseDto> commentDtos = new ArrayList<>();
 
         for (Comment comment : commentRepository.findByPost(post)) {
-            if (comment.getUser() == writer || comment.getUser() == user) {
-                // 전단지 작성자, 혹은 댓글 작성자일 경우 실제 댓글 내용 조회 가능
-                commentDtos.add(new CommentResponseDto(comment));
-            } else {
-                // 전단지 작성자, 댓글 작성자 둘 다 아니면 실제 댓글 내용이 아닌 "비밀 댓글입니다."로 조회되도록 함
-                Comment newComment = new Comment();
-                if (comment.getParent() == null) {
-                    newComment.createParent(comment.getUser(), post, comment.getContent(), comment.isSecret());
-                } else {
-                    newComment.createChild(comment.getUser(), post, comment.getContent(), comment.getParent(), comment.isSecret());
-                }
-                commentDtos.add(new CommentResponseDto(newComment));
-            }
+            commentDtos.add(new CommentResponseDto(comment));
         }
 
         return new PageImpl<>(commentDtos, pageable, commentDtos.size());
@@ -143,5 +116,16 @@ public class CommentService {
                 .orElseThrow(NotFoundException::new);
         comment.delete();
         commentRepository.save(comment);
+    }
+
+    /*
+     * 알림 추가 로직
+     */
+    private void setNotification(Long postId, CommentRequestDto commentRequestDto) {
+        Notification notification = new Notification();
+        notification.create(postRepository.findById(postId).orElseThrow(NotFoundException::new).getTitle(), commentRequestDto.getContent());
+        postRepository.findById(postId).orElseThrow(NotFoundException::new).getUser().setNotification(notification);
+        notificationRepository.save(notification);
+        userRepository.save(postRepository.findById(postId).orElseThrow(NotFoundException::new).getUser());
     }
 }
