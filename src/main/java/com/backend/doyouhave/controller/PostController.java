@@ -40,17 +40,16 @@ import java.util.List;
 @RestController
 public class PostController {
     private final PostService postService;
-    private final UserService userService;
     private final ResponseService responseService;
 
     @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "전단지 등록 API", notes = "전단지를 등록한다. (사진 최대 2개 선택, 태그 최대 3개 입력)")
-    public ResponseEntity<SingleResult> savePost(
+    public ResponseEntity<SingleResult<PostResponseDto>> savePost(
 //            @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : userId") Long userId,
-            @RequestPart(name="dto") PostRequestDto postRequestDto,
+            @RequestPart PostRequestDto postRequestDto,
             @Parameter(description = "multipart/form-data 형식의 이미지를 input 최대 2개로 입력받습니다.")
-            @RequestPart(name="img", required = false) MultipartFile imageFile,
-            @RequestPart(name="imgSecond", required = false) MultipartFile imageFileSecond) throws IOException {
+            @RequestPart(required = false) MultipartFile imageFile,
+            @RequestPart(required = false) MultipartFile imageFileSecond) throws IOException {
 
         Post post = postRequestDto.toEntity();
         Long savedPostId = postService.savePost(post, imageFile, imageFileSecond);
@@ -66,12 +65,9 @@ public class PostController {
 
     @GetMapping("/posts/{postId}/edit")
     @ApiOperation(value = "전단지 수정 정보 조회 API", notes = "수정할 전단지의 기존 정보를 반환한다.")
-    public ResponseEntity<?> updatePostInfo(
+    public ResponseEntity<SingleResult<PostUpdateResponseDto>> updatePostInfo(
             @PathVariable Long postId) {
         PostUpdateResponseDto updateResponse = postService.getPostInfo(postId);
-        if(updateResponse == null) {
-            return ResponseEntity.ok(ExceptionResponse.of(ExceptionCode.NOT_FOUND, "전단지가 존재하지 않습니다."));
-        }
         return ResponseEntity.ok(responseService.getSingleResult(updateResponse));
     }
 
@@ -79,9 +75,9 @@ public class PostController {
     @ApiOperation(value = "전단지 수정 API", notes = "전단지를 수정한다.")
     public ResponseEntity<Result> updatePost(
             @PathVariable Long postId,
-            @RequestPart(value="updatePost") PostUpdateRequestDto postUpdateRequestDto,
-            @RequestPart(value="img") MultipartFile updateImage,
-            @RequestPart(value="imgSecond") MultipartFile updateImageSecond) throws IOException {
+            @RequestPart PostUpdateRequestDto postUpdateRequestDto,
+            @RequestPart MultipartFile updateImage,
+            @RequestPart MultipartFile updateImageSecond) throws IOException {
         // 수정된 정보들을 받아 수정 처리
         Post updatedPost = postService.updatePost(postId, postUpdateRequestDto, updateImage, updateImageSecond);
 
@@ -103,12 +99,12 @@ public class PostController {
 
     @PatchMapping("/posts/{postId}")
     @ApiOperation(value = "전단지 북마크 API", notes = "전단지를 북마크한다.")
-    public ResponseEntity<?> bookMarkPost(
+    public ResponseEntity<Result> bookMarkPost(
             @PathVariable Long postId,
             @RequestParam(name = "mark") boolean mark,
              @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : userId") Long userId) {
         if(userId == null) {
-            return ResponseEntity.ok(ExceptionResponse.of(ExceptionCode.FAIL_AUTHENTICATION, "회원만 가능합니다."));
+            return ResponseEntity.ok(responseService.getFailureResult());
         }
         postService.markPost(userId, postId, mark);
         return ResponseEntity.ok(responseService.getSuccessResult());
