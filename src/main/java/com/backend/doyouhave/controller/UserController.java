@@ -12,6 +12,7 @@ import com.backend.doyouhave.exception.ExceptionResponse;
 import com.backend.doyouhave.service.PostService;
 import com.backend.doyouhave.service.UserService;
 import com.backend.doyouhave.service.result.MultiplePageResult;
+import com.backend.doyouhave.service.result.MultipleResult;
 import com.backend.doyouhave.service.result.ResponseService;
 import com.backend.doyouhave.service.result.SingleResult;
 import io.swagger.annotations.ApiOperation;
@@ -54,7 +55,7 @@ public class UserController {
     /* 사용자 프로필 반환 API */
     @GetMapping("/profile")
     @ApiOperation(value = "사용자 프로필 조회 API", response = UserProfileResponseDto.class)
-    public ResponseEntity<SingleResult> findUsersProfile(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<SingleResult<UserProfileResponseDto>> findUsersProfile(@AuthenticationPrincipal Long userId) {
         UserProfileResponseDto result = userService.findUsersProfile(userId);
         return ResponseEntity.ok(responseService.getSingleResult(result));
 
@@ -63,7 +64,7 @@ public class UserController {
     /* 사용자가 작성한 포스트 목록 반환 API */
     @GetMapping("/mypage/posts")
     @ApiOperation(value = "사용자가 작성한 포스트 목록 반환 API")
-    public ResponseEntity<MultiplePageResult> usersPostListUp(
+    public ResponseEntity<MultiplePageResult<PostListResponseDto>> usersPostListUp(
             @AuthenticationPrincipal Long userId,
             @PageableDefault(size=10) Pageable pageable) {
 
@@ -74,7 +75,7 @@ public class UserController {
     /* 최근 알림 API */
     @GetMapping("/mypage/notifications")
     @ApiOperation(value = "최근 알림 API", notes = "마이페이지에서 최근 알림을 조회한다. (최대 알림 8개) ")
-    public ResponseEntity<?> getNotification(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<MultipleResult<NotificationResponseDto>> getNotification(@AuthenticationPrincipal Long userId) {
 
         List<NotificationResponseDto> notificationResponseDtos = userService.getNotifications(userId);
         return ResponseEntity.ok(responseService.getMultipleResult(notificationResponseDtos));
@@ -83,7 +84,7 @@ public class UserController {
     /* 내 북마크 목록 API */
     @GetMapping("/mypage/marks")
     @ApiOperation(value = "내 북마크 목록 API", notes = "마이페이지에서 내가 북마크한 게시글들의 기본 정보를 반환한다.")
-    public ResponseEntity<?> usersLikes(
+    public ResponseEntity<MultiplePageResult<PostListResponseDto>> usersLikes(
             @AuthenticationPrincipal Long userId,
             @PageableDefault(size = 20) Pageable pageable) {
         Page<PostListResponseDto> postListResponseDtos = userService.marksList(userId, pageable);

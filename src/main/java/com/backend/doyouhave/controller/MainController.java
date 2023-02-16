@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class MainController {
     private final ResponseService responseService;
 
     @GetMapping
-    public ResponseEntity<SingleResult> countOfPost() {
+    public ResponseEntity<SingleResult<MainInfoDto>> countOfPost() {
 
         Map<String, Integer> countPost = postService.findCountPost();
 
@@ -48,7 +49,7 @@ public class MainController {
             @ApiResponse(code = 401, message = "권한이 없는 사용자입니다."),
             @ApiResponse(code = 404, message = "잘못된 요청입니다.")
     })
-    public ResponseEntity<MultiplePageResult> postListUp(
+    public ResponseEntity<MultiplePageResult<PostListResponseDto>> postListUp(
             @RequestParam(name="category", required = false) String category,
             @RequestParam(name="tag", required = false) String tag,
             @RequestParam(name="search", required = false) String search,
@@ -63,7 +64,8 @@ public class MainController {
 
     /* 인기 태그 조회 API */
     @GetMapping("/list/top")
-    public ResponseEntity<MultipleResult> postTop5Tag(
+    @ApiOperation(value = "전단지 인기 태그 Top5 조회", notes = "선택한 카테고리에 따른 인기 태그 Top5를 반환한다.")
+    public ResponseEntity<MultipleResult<String>> postTop5Tag(
             @RequestParam(name="category", required = false) String category) {
         List<String> topTags = postService.findTopTags(category);
         return ResponseEntity.ok(responseService.getMultipleResult(topTags));

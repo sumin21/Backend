@@ -16,6 +16,12 @@ public class ResponseService {
         return result;
     }
 
+    public Result getFailureResult() {
+        Result result = new Result();
+        setFailureResult(result);
+        return result;
+    }
+
     public <T> SingleResult<T> getSingleResult(T data) {
         SingleResult<T> result = new SingleResult<>();
         setSuccessResult(result);
@@ -41,5 +47,11 @@ public class ResponseService {
         result.setSuccess(true);
         result.setCode(HttpStatus.OK);
         result.setMsg("성공");
+    }
+
+    public void setFailureResult(Result result) {
+        result.setSuccess(false);
+        result.setCode(HttpStatus.NOT_FOUND);
+        result.setMsg("실패");
     }
 }

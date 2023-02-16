@@ -1,12 +1,17 @@
 package com.backend.doyouhave.controller;
 
+import com.backend.doyouhave.domain.comment.Comment;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
+import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.comment.dto.MyInfoCommentResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostResponseDto;
+import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.service.CommentService;
 import com.backend.doyouhave.service.PostService;
 import com.backend.doyouhave.service.UserService;
+import com.backend.doyouhave.service.result.MultipleResult;
 import com.backend.doyouhave.service.result.ResponseService;
+import com.backend.doyouhave.service.result.Result;
 import com.backend.doyouhave.service.result.SingleResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +21,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -32,7 +38,7 @@ public class CommentController {
     @PostMapping("/posts/{postId}")
     @ApiOperation(value = "댓글 생성")
     public ResponseEntity<SingleResult<PostResponseDto>> saveComment(@PathVariable("postId") Long postId,
-                                                    @AuthenticationPrincipal Long userId,
+                                                                     @AuthenticationPrincipal Long userId,
                                                     @RequestBody CommentRequestDto commentRequestDto) {
         commentService.save(commentRequestDto, userId, postId);
 
