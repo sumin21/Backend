@@ -27,7 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/users/{userId}")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class CommentController {
 
