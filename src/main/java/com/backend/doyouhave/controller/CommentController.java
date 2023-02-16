@@ -39,7 +39,7 @@ public class CommentController {
     /* 댓글 생성 API */
     @PostMapping("/posts/{postId}")
     @ApiOperation(value = "댓글 생성", response = CommentResponseDto.class)
-    public ResponseEntity<SingleResult> saveComment(@PathVariable("postId") Long postId,
+    public ResponseEntity<SingleResult<PostResponseDto>> saveComment(@PathVariable("postId") Long postId,
                                                     @RequestBody CommentRequestDto commentRequestDto) {
         if (commentRequestDto.getParent() == null) {
             commentService.saveParent(commentRequestDto);
@@ -53,7 +53,7 @@ public class CommentController {
     /* 댓글 수정 API */
     @PostMapping("/posts/{postId}/{commentId}")
     @ApiOperation(value = "댓글 수정", response = CommentResponseDto.class)
-    public ResponseEntity<SingleResult> updateComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
+    public ResponseEntity<SingleResult<PostResponseDto>> updateComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
                                                       @RequestBody CommentRequestDto commentRequestDto) {
         commentService.update(commentId, commentRequestDto);
 
@@ -66,7 +66,7 @@ public class CommentController {
     /* 댓글 삭제 API */
     @DeleteMapping("/posts/{postId}/{commentId}")
     @ApiOperation(value = "댓글 삭제", response = CommentResponseDto.class)
-    public ResponseEntity<SingleResult> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
+    public ResponseEntity<SingleResult<PostResponseDto>> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
 
         commentService.delete(commentId);
 
