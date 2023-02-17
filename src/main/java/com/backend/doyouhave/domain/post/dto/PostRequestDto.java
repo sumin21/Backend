@@ -25,6 +25,9 @@ public class PostRequestDto {
     @ApiModelProperty(value = "kakaotalk")
     @NotNull
     private String contactWay;
+    @ApiModelProperty(value = "http://open.kakao.com/o/sDMnCBS")
+    @NotNull
+    private String contactUrl;
     @ApiModelProperty(value = "공부")
     @NotNull
     private String categoryKeyword;
@@ -33,17 +36,18 @@ public class PostRequestDto {
 
 
     @Builder
-    public PostRequestDto(String title, String content, String contactWay, String categoryKeyword, String tags) {
+    public PostRequestDto(String title, String content, String contactWay, String contactUrl, String categoryKeyword, String tags) {
         this.title = title;
         this.content = content;
         this.contactWay = contactWay;
+        this.contactUrl = contactUrl;
         this.categoryKeyword = categoryKeyword;
         this.tags = tags;
     }
 
     public Post toEntity() {
         Post post = new Post();
-        post.create(title, content, contactWay, categoryKeyword, tags);
+        post.create(title, content, contactWay, contactUrl, categoryKeyword, tags);
         return post;
     }
 }

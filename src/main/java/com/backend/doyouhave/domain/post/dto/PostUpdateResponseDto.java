@@ -20,6 +20,8 @@ public class PostUpdateResponseDto {
     private String content;
     @ApiModelProperty(value = "Google Form")
     private String contactWay;
+    @ApiModelProperty(value = "http://open.kakao.com/o/sDMnCBS")
+    private String contactUrl;
     @ApiModelProperty(value = "MEDICAL")
     private String categoryKeyword;
     @ApiModelProperty(value = "['test1', 'test2', 'test3']")
@@ -34,6 +36,7 @@ public class PostUpdateResponseDto {
         this.title = entity.getTitle();
         this.content = entity.getContent();
         this.contactWay = entity.getContactWay();
+        this.contactUrl = entity.getContactUrl();
         this.categoryKeyword = entity.getCategory();
         List<String> entityTags = Arrays.stream(entity.getTags().split(",")).toList();
         this.tags = entityTags;

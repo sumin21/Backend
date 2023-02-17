@@ -18,6 +18,9 @@ public class PostUpdateRequestDto {
     @ApiModelProperty(value = "카카오톡")
     @NotNull
     private String contactWay;
+    @ApiModelProperty(value = "http://open.kakao.com/o/sDMnCBS")
+    @NotNull
+    private String contactUrl;
     @ApiModelProperty(value = "의류")
     @NotNull
     private String categoryKeyword;
