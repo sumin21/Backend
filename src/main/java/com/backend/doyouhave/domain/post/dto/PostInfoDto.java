@@ -22,6 +22,8 @@ public class PostInfoDto {
     @ApiModelProperty(value = "2022~~")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdDate;
+    @ApiModelProperty(value = "1")
+    private Long writerId;
     @ApiModelProperty(value = "true")
     private Boolean isWriter;
     @ApiModelProperty(value = "고민이 있어요")
@@ -49,6 +51,7 @@ public class PostInfoDto {
     public PostInfoDto(Post entity, Long userId, Boolean mark, Long markNum) {
         this.postId = entity.getId();
         this.createdDate = entity.getCreatedDate();
+        this.writerId = entity.getUser().getId();
         this.isWriter = userId != null && Objects.equals(entity.getUser().getId(), userId);
         this.title = entity.getTitle();
         this.content = entity.getContent();
