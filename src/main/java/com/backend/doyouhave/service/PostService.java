@@ -1,7 +1,9 @@
 package com.backend.doyouhave.service;
 
+import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
+import com.backend.doyouhave.domain.post.dto.PostInfoDto;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
@@ -77,7 +79,7 @@ public class PostService {
     }
 
     /* 전단지 수정 정보 반환 */
-    public PostUpdateResponseDto getPostInfo(Long postId) {
+    public PostUpdateResponseDto getPostInfoForUpdate(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException());
         PostUpdateResponseDto updateResponse = PostUpdateResponseDto.builder().entity(post).build();
         return updateResponse;
@@ -190,4 +192,14 @@ public class PostService {
             userLikesRepository.delete(userLikes);
         }
     }
+
+    /* 게시글 정보 반환 */
+    public PostInfoDto getPostInfo(Long userId, Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
+        Boolean mark = userId != null && userLikesRepository.findByUserIdAndPostId(userId, postId).isPresent();
+        Long markNum = (long) post.getUserLikes().size();
+
+        return PostInfoDto.from(post, userId, mark, markNum);
+    }
+
 }

@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Schema(description = "CommentResponseDTO")
 @ApiModel(description = "CommentResponseDTO")
@@ -14,6 +16,10 @@ public class CommentResponseDto {
     @ApiModelProperty(value = "댓글 아이디", required = true, example = "1")
     @Schema(description = "댓글 아이디")
     private final Long commentId;
+
+    @ApiModelProperty(value = "댓글 생성 날짜", required = true, example = "2022~")
+    @Schema(description = "댓글 생성 날짜")
+    private final LocalDateTime createdDate;
 
     @ApiModelProperty(value = "댓글 내용", required = true, example = "댓글 내용 예시")
     @Schema(description = "댓글 내용")
@@ -41,6 +47,7 @@ public class CommentResponseDto {
 
     public CommentResponseDto(Comment comment) {
         this.commentId = comment.getId();
+        this.createdDate = comment.getCreatedDate();
         this.content = comment.getContent();
         // 원 댓글일 경우에는 parentId가 자기 Id
         this.parentId = comment.getParentId();
