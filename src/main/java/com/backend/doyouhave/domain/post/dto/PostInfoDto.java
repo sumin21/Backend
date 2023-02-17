@@ -2,6 +2,7 @@ package com.backend.doyouhave.domain.post.dto;
 
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class PostInfoDto {
     @ApiModelProperty(value = "1")
     private Long postId;
     @ApiModelProperty(value = "2022~~")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdDate;
     @ApiModelProperty(value = "true")
     private Boolean isWriter;

@@ -1,6 +1,7 @@
 package com.backend.doyouhave.domain.comment.dto;
 
 import com.backend.doyouhave.domain.comment.Comment;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +20,7 @@ public class CommentResponseDto {
 
     @ApiModelProperty(value = "댓글 생성 날짜", required = true, example = "2022~")
     @Schema(description = "댓글 생성 날짜")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private final LocalDateTime createdDate;
 
     @ApiModelProperty(value = "댓글 내용", required = true, example = "댓글 내용 예시")
