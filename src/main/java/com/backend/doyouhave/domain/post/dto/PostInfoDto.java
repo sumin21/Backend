@@ -32,6 +32,8 @@ public class PostInfoDto {
     private String content;
     @ApiModelProperty(value = "Google Form")
     private String contactWay;
+    @ApiModelProperty(value = "http://open.kakao.com/o/sDMnCBS")
+    private String contactUrl;
     @ApiModelProperty(value = "MEDICAL")
     private String categoryKeyword;
     @ApiModelProperty(value = "['test1', 'test2', 'test3']")
@@ -56,6 +58,7 @@ public class PostInfoDto {
         this.title = entity.getTitle();
         this.content = entity.getContent();
         this.contactWay = entity.getContactWay();
+        this.contactUrl = entity.getContactUrl();
         this.categoryKeyword = entity.getCategory();
         this.tags = Arrays.stream(entity.getTags().split(",")).toList();
         this.img = entity.getImg();
