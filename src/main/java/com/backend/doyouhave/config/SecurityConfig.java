@@ -7,6 +7,7 @@ import com.backend.doyouhave.jwt.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +44,8 @@ public class SecurityConfig {
                 "/api/users/kakao-login",
                 "/api/users/naver-login",
                 "/api/auth/token-refresh"
-        );
+        ).mvcMatchers(HttpMethod.GET, "/api/users/posts/**");
+
     }
 
     @Bean

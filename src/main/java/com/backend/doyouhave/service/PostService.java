@@ -1,7 +1,9 @@
 package com.backend.doyouhave.service;
 
+import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
+import com.backend.doyouhave.domain.post.dto.PostInfoDto;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
 import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
@@ -77,7 +79,7 @@ public class PostService {
     }
 
     /* 전단지 수정 정보 반환 */
-    public PostUpdateResponseDto getPostInfo(Long postId) {
+    public PostUpdateResponseDto getPostInfoForUpdate(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException());
         PostUpdateResponseDto updateResponse = PostUpdateResponseDto.builder().entity(post).build();
         return updateResponse;
@@ -173,7 +175,6 @@ public class PostService {
 
     /* 북마크 처리 (상세 정보 dto에서도 북마크 여부 반환 필요) */
     public void markPost(Long postId, Long userId, boolean mark) {
-
         User user =  userRepository.findById(userId).orElseThrow();
         Post markedPost = postRepository.findById(postId).orElseThrow();
 
@@ -181,7 +182,7 @@ public class PostService {
                                         .markedUser(user)
                                         .markedPost(markedPost)
                                         .build();
-        if(mark == false) {
+        if(mark) {
             userLikes.setUser(user);
             userLikes.setPost(markedPost);
             userLikesRepository.save(userLikes);
@@ -190,4 +191,18 @@ public class PostService {
             userLikesRepository.delete(userLikes);
         }
     }
+
+    /* 게시글 정보 반환 */
+    public PostInfoDto getPostInfo(Long userId, Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
+        Boolean mark = userId != null && userLikesRepository.findByUserIdAndPostId(userId, postId).isPresent();
+        Long markNum = (long) post.getUserLikes().size();
+
+        post.setCommentNum(post.getCommentList().size());
+        post.setViewCount(post.getViewCount()+1);
+        postRepository.save(post);
+
+        return PostInfoDto.from(post, userId, mark, markNum);
+    }
+
 }

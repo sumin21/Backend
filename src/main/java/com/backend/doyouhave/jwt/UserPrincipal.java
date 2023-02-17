@@ -2,6 +2,7 @@ package com.backend.doyouhave.jwt;
 
 
 import com.backend.doyouhave.domain.user.User;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,10 +10,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+@Getter
 public class UserPrincipal implements UserDetails {
 
-    private final Long userId;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private Long userId;
+    private Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(Long userId, Collection<? extends GrantedAuthority> authorities) {
         this.userId = userId;

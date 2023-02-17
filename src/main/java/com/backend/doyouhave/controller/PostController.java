@@ -1,28 +1,15 @@
 package com.backend.doyouhave.controller;
 
-import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
 import com.backend.doyouhave.domain.post.Post;
-import com.backend.doyouhave.domain.post.dto.PostRequestDto;
-import com.backend.doyouhave.domain.post.dto.PostResponseDto;
-import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
-import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
+import com.backend.doyouhave.domain.post.dto.*;
 import com.backend.doyouhave.domain.user.User;
-import com.backend.doyouhave.exception.ExceptionCode;
-import com.backend.doyouhave.exception.ExceptionResponse;
-import com.backend.doyouhave.exception.NotFoundException;
-import com.backend.doyouhave.jwt.UserPrincipal;
-import com.backend.doyouhave.repository.user.UserRepository;
 import com.backend.doyouhave.service.PostService;
-import com.backend.doyouhave.service.UserService;
-import com.backend.doyouhave.service.result.MultipleResult;
 import com.backend.doyouhave.service.result.ResponseService;
 import com.backend.doyouhave.service.result.Result;
 import com.backend.doyouhave.service.result.SingleResult;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,9 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("api/users")
@@ -67,7 +54,7 @@ public class PostController {
     @ApiOperation(value = "전단지 수정 정보 조회 API", notes = "수정할 전단지의 기존 정보를 반환한다.")
     public ResponseEntity<SingleResult<PostUpdateResponseDto>> updatePostInfo(
             @PathVariable Long postId) {
-        PostUpdateResponseDto updateResponse = postService.getPostInfo(postId);
+        PostUpdateResponseDto updateResponse = postService.getPostInfoForUpdate(postId);
         return ResponseEntity.ok(responseService.getSingleResult(updateResponse));
     }
 
@@ -102,12 +89,21 @@ public class PostController {
     public ResponseEntity<Result> bookMarkPost(
             @PathVariable Long postId,
             @RequestParam(name = "mark") boolean mark,
-             @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : userId") Long userId) {
+             @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this") Long userId) {
         if(userId == null) {
             return ResponseEntity.ok(responseService.getFailureResult());
         }
-        postService.markPost(userId, postId, mark);
+        postService.markPost(postId, userId, mark);
         return ResponseEntity.ok(responseService.getSuccessResult());
+    }
+
+    @GetMapping("/posts/{postId}")
+    @ApiOperation(value = "전단지 정보 반환 API", notes = "전단지 정보를 반환한다.")
+    public ResponseEntity<SingleResult<PostInfoDto>> getPostInfo(
+            @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this") Long userId,
+            @PathVariable Long postId) {
+        PostInfoDto result = postService.getPostInfo(userId, postId);
+        return ResponseEntity.ok(responseService.getSingleResult(result));
     }
 
 }
