@@ -38,8 +38,8 @@ public class UserLikes extends BaseTimeEntity {
     }
 
     public void deleteUserAndPost(User markedUser, Post markedPost) {
-        user.getUserLikes().remove(markedUser);
-        post.getUserLikes().remove(markedPost);
+        markedUser.getUserLikes().remove(this);
+        markedPost.getUserLikes().remove(this);
     }
 
     @Builder

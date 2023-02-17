@@ -38,9 +38,10 @@ public class PostService {
     private final CloudManager cloudManager;
 
     /* 전단지 작성 */
-    public Long savePost(Post savedPost, MultipartFile imageFile, MultipartFile imageFileSecond) throws IOException {
+    public Long savePost(Long userId, Post savedPost, MultipartFile imageFile, MultipartFile imageFileSecond) throws IOException {
 
-        // savedPost.setUser(user);
+        savedPost.setUser(userRepository.findById(userId).orElseThrow());
+
         // 카테고리 별로 태그 저장. 카테고리가 기존에 존재하는 키워드라면 해당 카테고리에 속하는 태그들을 추가하는 방식
         Category categoryResult = categoryRepository.findByKeyword(savedPost.getCategory());
         if (categoryResult == null) {
@@ -68,12 +69,12 @@ public class PostService {
     }
 
     /* 전단지 삭제 */
-    public void deletePost(Long postId) throws IOException {
+    public void deletePost(Long userId, Long postId) throws IOException {
         Post foundedPost = postRepository.findById(postId).orElseThrow(
                 () -> new NotFoundException());
         // 전단지가 삭제되면 작성자가 입력한 게시글의 해당 카테고리 태그들도 삭제됨
         deleteCategoryTags(foundedPost);
-        // foundedPost.remove(user);
+        foundedPost.remove(userRepository.findById(userId).orElseThrow());
         cloudManager.deleteFile(foundedPost, foundedPost.getImg(), foundedPost.getImgSecond());
         postRepository.delete(foundedPost);
     }
@@ -173,8 +174,8 @@ public class PostService {
         return postResultList;
     }
 
-    /* 북마크 처리 (상세 정보 dto에서도 북마크 여부 반환 필요) */
-    public void markPost(Long postId, Long userId, boolean mark) {
+    /* 북마크 처리 */
+    public void markPost(Long postId, Long userId) {
         User user =  userRepository.findById(userId).orElseThrow();
         Post markedPost = postRepository.findById(postId).orElseThrow();
 
@@ -182,14 +183,16 @@ public class PostService {
                                         .markedUser(user)
                                         .markedPost(markedPost)
                                         .build();
-        if(mark) {
-            userLikes.setUser(user);
-            userLikes.setPost(markedPost);
-            userLikesRepository.save(userLikes);
-        } else {
-            userLikes.deleteUserAndPost(user, markedPost);
-            userLikesRepository.delete(userLikes);
-        }
+        userLikes.setUser(user);
+        userLikes.setPost(markedPost);
+        userLikesRepository.save(userLikes);
+    }
+
+    /* 북마크 제거 */
+    public void markDeletePost(Long postId, Long userId) {
+        UserLikes deleteMark = userLikesRepository.findNotOptionalByUserIdAndPostId(userId, postId);
+        deleteMark.deleteUserAndPost(userRepository.findById(userId).orElseThrow(), postRepository.findById(postId).orElseThrow());
+        userLikesRepository.delete(deleteMark);
     }
 
     /* 게시글 정보 반환 */
