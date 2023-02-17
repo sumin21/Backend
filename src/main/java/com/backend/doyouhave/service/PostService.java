@@ -199,6 +199,10 @@ public class PostService {
         Boolean mark = userId != null && userLikesRepository.findByUserIdAndPostId(userId, postId).isPresent();
         Long markNum = (long) post.getUserLikes().size();
 
+        post.setCommentNum(post.getCommentList().size());
+        post.setViewCount(post.getViewCount()+1);
+        postRepository.save(post);
+
         return PostInfoDto.from(post, userId, mark, markNum);
     }
 
