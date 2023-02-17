@@ -89,11 +89,11 @@ public class PostController {
     public ResponseEntity<Result> bookMarkPost(
             @PathVariable Long postId,
             @RequestParam(name = "mark") boolean mark,
-             @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : userId") Long userId) {
+             @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this") Long userId) {
         if(userId == null) {
             return ResponseEntity.ok(responseService.getFailureResult());
         }
-        postService.markPost(userId, postId, mark);
+        postService.markPost(postId, userId, mark);
         return ResponseEntity.ok(responseService.getSuccessResult());
     }
 

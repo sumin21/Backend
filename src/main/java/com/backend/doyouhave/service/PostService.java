@@ -175,7 +175,6 @@ public class PostService {
 
     /* 북마크 처리 (상세 정보 dto에서도 북마크 여부 반환 필요) */
     public void markPost(Long postId, Long userId, boolean mark) {
-
         User user =  userRepository.findById(userId).orElseThrow();
         Post markedPost = postRepository.findById(postId).orElseThrow();
 
@@ -183,7 +182,7 @@ public class PostService {
                                         .markedUser(user)
                                         .markedPost(markedPost)
                                         .build();
-        if(mark == false) {
+        if(mark) {
             userLikes.setUser(user);
             userLikes.setPost(markedPost);
             userLikesRepository.save(userLikes);
