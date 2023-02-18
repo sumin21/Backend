@@ -21,11 +21,14 @@ public class PostListResponseDto {
     private String categoryKeyword;
     @ApiParam(value = "글 태그", example = "['MVC', 'SECURITY', 'MYSQL']")
     private List<String> tags;
+    @ApiParam(value = "이미지 URL (메인 이미지)")
+    private String imgUrl;
 
     public PostListResponseDto(Post entity) {
         this.title = entity.getTitle();
         this.categoryKeyword = entity.getCategory();
         List<String> entityTags = Arrays.stream(entity.getTags().split(",")).toList();
         this.tags = entityTags;
+        this.imgUrl = entity.getImg();
     }
 }
