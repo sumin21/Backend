@@ -1,17 +1,21 @@
 package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.comment.Comment;
+import com.backend.doyouhave.domain.comment.dto.ChildCommentDto;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
 import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.comment.dto.MyInfoCommentResponseDto;
 import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.exception.BusinessException;
+import com.backend.doyouhave.exception.ExceptionCode;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.comment.CommentRepository;
 import com.backend.doyouhave.repository.notification.NotificationRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
+import com.backend.doyouhave.service.sorttype.SortWay;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -19,8 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -99,14 +102,32 @@ public class CommentService {
      */
     public Page<CommentResponseDto> getCommentsByPost(Long postId, Long userId, Pageable pageable) {
         Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
-        List<Comment> commentList = commentRepository.findByPost(post);
-        List<CommentResponseDto> commentDtos = new ArrayList<>();
-
+        List<Comment> commentList = commentRepository.findByPostOrderByCreatedDate(post);
+        Map<Long, String> writeCommentUserIdAndNameMap = new HashMap<>(); //U (댓글 작성자들 목록)
+        Map<Long, CommentResponseDto> commentIdAndDtoMap = new LinkedHashMap<>(); //R
+        
         for (Comment comment : commentList) {
-//            commentDtos.add(CommentResponseDto.from(comment, userId, ));
-        }
+            User commentWriter = comment.getUser();
+            boolean isWriter = Objects.equals(commentWriter, comment.getPost().getUser());
+            String name = isWriter ? "글쓴이" : writeCommentUserIdAndNameMap.computeIfAbsent(commentWriter.getId(), key -> "익명"+String.valueOf(writeCommentUserIdAndNameMap.size()+1));
 
-        return new PageImpl<>(commentDtos, pageable, commentDtos.size());
+            if (comment.getParentId() != null) {
+                // 부모 존재
+                CommentResponseDto parentComment = commentIdAndDtoMap.getOrDefault(comment.getParentId(), null);
+//                System.out.println("comment.getId() = " + comment.getId());
+                if (parentComment == null) throw new BusinessException(ExceptionCode.INTERNAL_SERVER_ERROR);
+                parentComment.getChildComments().add(ChildCommentDto.from(comment, userId, name));
+            }
+
+            else {
+                commentIdAndDtoMap.put(comment.getId(), CommentResponseDto.from(comment, userId, name));
+                System.out.println("comment.getId() = " + comment.getId());
+
+            }
+        }
+        System.out.println("writeCommentUserIdAndNameMap = " + writeCommentUserIdAndNameMap);
+        System.out.println("commentIdAndDtoMap = " + commentIdAndDtoMap);
+        return new PageImpl<>(new ArrayList<>(commentIdAndDtoMap.values()), pageable, commentIdAndDtoMap.size());
     }
 
     /*

@@ -15,6 +15,7 @@ import com.backend.doyouhave.service.result.Result;
 import com.backend.doyouhave.service.result.SingleResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -82,13 +83,13 @@ public class CommentController {
     /* 댓글 목록 반환 API */
     @GetMapping("/posts/{postId}/comments")
     @ApiOperation(value = "댓글 목록 반환")
-    public ResponseEntity<SingleResult<PostResponseDto>> getCommentsByPost(
+    public ResponseEntity<?> getCommentsByPost(
             @PathVariable("postId") Long postId,
             @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this") Long userId,
             @PageableDefault(size=10) Pageable pageable
     ) {
-        commentService.getCommentsByPost(postId, userId, pageable);
+        Page<CommentResponseDto> commentsByPost = commentService.getCommentsByPost(postId, userId, pageable);
 
-        return ResponseEntity.ok(responseService.getSingleResult(new PostResponseDto(postId)));
+        return ResponseEntity.ok(commentsByPost);
     }
 }
