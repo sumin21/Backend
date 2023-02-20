@@ -78,4 +78,17 @@ public class CommentController {
 
         return ResponseEntity.ok(commentService.findByUser(userId, pageable));
     }
+
+    /* 댓글 목록 반환 API */
+    @GetMapping("/posts/{postId}/comments")
+    @ApiOperation(value = "댓글 목록 반환")
+    public ResponseEntity<SingleResult<PostResponseDto>> getCommentsByPost(
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this") Long userId,
+            @PageableDefault(size=10) Pageable pageable
+    ) {
+        commentService.getCommentsByPost(postId, userId, pageable);
+
+        return ResponseEntity.ok(responseService.getSingleResult(new PostResponseDto(postId)));
+    }
 }

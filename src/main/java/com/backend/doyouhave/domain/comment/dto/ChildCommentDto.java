@@ -1,8 +1,6 @@
 package com.backend.doyouhave.domain.comment.dto;
 
 import com.backend.doyouhave.domain.comment.Comment;
-import com.backend.doyouhave.domain.post.Post;
-import com.backend.doyouhave.domain.post.dto.PostInfoDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,16 +11,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Getter
-@Schema(description = "CommentResponseDTO")
-@ApiModel(description = "CommentResponseDTO")
+@Schema(description = "ChildCommentDto")
+@ApiModel(description = "ChildCommentDto")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CommentResponseDto {
+public class ChildCommentDto {
 
     @ApiModelProperty(value = "댓글 아이디", required = true, example = "1")
     @Schema(description = "댓글 아이디")
@@ -57,12 +52,8 @@ public class CommentResponseDto {
     @Schema(description = "댓글 작성자 유무", required = true)
     private Boolean isCommentWriter;
 
-    @ApiModelProperty(value = "대댓글 목록 (1단계만)", required = true)
-    @Schema(description = "대댓글 목록 (1단계만)", required = true)
-    private List<ChildCommentDto> childComments = new ArrayList<>();
-
     @Builder
-    public CommentResponseDto(Comment comment, Long userId, String name) {
+    public ChildCommentDto(Comment comment, Long userId, String name) {
         this.commentId = comment.getId();
         this.createdDate = comment.getCreatedDate();
         this.name = name;
@@ -73,12 +64,11 @@ public class CommentResponseDto {
         this.isCommentWriter = userId != null && Objects.equals(comment.getUser().getId(), userId); // 댓글 작성자 id
     }
 
-    public static CommentResponseDto from(Comment comment, Long userId, String name) {
-        return CommentResponseDto.builder()
+    public static ChildCommentDto from(Comment comment, Long userId, String name) {
+        return ChildCommentDto.builder()
                 .comment(comment)
                 .userId(userId)
                 .name(name)
                 .build();
     }
-
 }

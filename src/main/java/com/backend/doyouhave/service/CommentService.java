@@ -97,11 +97,13 @@ public class CommentService {
     /*
      * 전단지에 작성된 댓글
      */
-    public Page<CommentResponseDto> findByPost(Post post, Pageable pageable, User writer, User user) {
+    public Page<CommentResponseDto> getCommentsByPost(Long postId, Long userId, Pageable pageable) {
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
+        List<Comment> commentList = commentRepository.findByPost(post);
         List<CommentResponseDto> commentDtos = new ArrayList<>();
 
-        for (Comment comment : commentRepository.findByPost(post)) {
-            commentDtos.add(new CommentResponseDto(comment));
+        for (Comment comment : commentList) {
+//            commentDtos.add(CommentResponseDto.from(comment, userId, ));
         }
 
         return new PageImpl<>(commentDtos, pageable, commentDtos.size());
