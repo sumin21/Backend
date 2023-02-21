@@ -94,4 +94,11 @@ public class UserController {
         userService.deleteRefreshToken(userId);
         return ResponseEntity.ok(responseService.getSuccessResult());
     }
+
+    @PostMapping("/resign")
+    @ApiOperation(value = "회원탈퇴 API", notes = "탈퇴사유를 저장하고 사용자 데이터는 삭제한다.")
+    public ResponseEntity<Result> deleteUser(@AuthenticationPrincipal Long userId) {
+
+        return ResponseEntity.ok(responseService.getSuccessResult());
+    }
 }
