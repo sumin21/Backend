@@ -1,12 +1,15 @@
 package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.comment.Comment;
+import com.backend.doyouhave.domain.comment.dto.ChildCommentDto;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
-import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
+import com.backend.doyouhave.domain.comment.dto.CommentInfoDto;
 import com.backend.doyouhave.domain.comment.dto.MyInfoCommentResponseDto;
 import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.user.User;
+import com.backend.doyouhave.exception.BusinessException;
+import com.backend.doyouhave.exception.ExceptionCode;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.comment.CommentRepository;
 import com.backend.doyouhave.repository.notification.NotificationRepository;
@@ -19,8 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -97,14 +99,45 @@ public class CommentService {
     /*
      * 전단지에 작성된 댓글
      */
-    public Page<CommentResponseDto> findByPost(Post post, Pageable pageable, User writer, User user) {
-        List<CommentResponseDto> commentDtos = new ArrayList<>();
+    public Page<CommentInfoDto> getCommentsByPost(Long postId, Long userId, Pageable pageable) {
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
+        List<Comment> commentList = commentRepository.findByPostOrderByCreatedDate(post);
+        // 댓글 작성자 목록 (userId, 별명) <- 익명 순서 지정하기 위해
+        Map<Long, String> writeCommentUserIdAndNameMap = new HashMap<>();
+        // 댓글 목록 (commentId, comment) <- 원댓글, 대댓글 관계 매핑 위해
+        Map<Long, CommentInfoDto> commentIdAndDtoMap = new LinkedHashMap<>();
+        
+        for (Comment comment : commentList) {
+            User commentWriter = comment.getUser();
+            boolean isWriter = Objects.equals(commentWriter, comment.getPost().getUser());
+            String name = isWriter ? "글쓴이" : writeCommentUserIdAndNameMap.computeIfAbsent(
+                    commentWriter.getId(),
+                    key -> "익명"+String.valueOf(writeCommentUserIdAndNameMap.size()+1)
+            );
 
-        for (Comment comment : commentRepository.findByPost(post)) {
-            commentDtos.add(new CommentResponseDto(comment));
+            if (comment.getParentId() != null) {
+                // 대댓글인 경우
+                CommentInfoDto parentComment = commentIdAndDtoMap.getOrDefault(comment.getParentId(), null);
+                if (parentComment == null) throw new BusinessException(ExceptionCode.INTERNAL_SERVER_ERROR);
+                parentComment.getChildComments().add(ChildCommentDto.from(comment, userId, name, parentComment.getIsCommentWriter()));
+            } else {
+                // 원댓글인 경우
+                commentIdAndDtoMap.put(comment.getId(), CommentInfoDto.from(comment, userId, name));
+            }
         }
+        List<CommentInfoDto> result = new ArrayList<>(commentIdAndDtoMap.values());
 
-        return new PageImpl<>(commentDtos, pageable, commentDtos.size());
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), result.size());
+        return new PageImpl<>(result.subList(start, end), pageable, result.size());
+    }
+
+    /*
+     * 사용자가 해당 게시글 작성자인지 유무 확인
+     */
+    public boolean checkUserIsWriter(Long postId, Long userId) {
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
+        return Objects.equals(post.getUser().getId(), userId);
     }
 
     /*

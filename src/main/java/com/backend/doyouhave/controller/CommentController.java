@@ -1,30 +1,27 @@
 package com.backend.doyouhave.controller;
 
-import com.backend.doyouhave.domain.comment.Comment;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
+import com.backend.doyouhave.domain.comment.dto.CommentInfoDto;
 import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.comment.dto.MyInfoCommentResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostResponseDto;
-import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.service.CommentService;
-import com.backend.doyouhave.service.PostService;
-import com.backend.doyouhave.service.UserService;
-import com.backend.doyouhave.service.result.MultipleResult;
 import com.backend.doyouhave.service.result.ResponseService;
-import com.backend.doyouhave.service.result.Result;
 import com.backend.doyouhave.service.result.SingleResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -77,5 +74,18 @@ public class CommentController {
     public ResponseEntity<?> myComments(@AuthenticationPrincipal Long userId, @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(commentService.findByUser(userId, pageable));
+    }
+
+    /* 댓글 목록 반환 API */
+    @GetMapping("/posts/{postId}/comments")
+    @ApiOperation(value = "댓글 목록 반환")
+    public ResponseEntity<SingleResult<CommentResponseDto>> getCommentsByPost(
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this") Long userId,
+            @PageableDefault(size=10) Pageable pageable
+    ) {
+        boolean isWriter = commentService.checkUserIsWriter(postId, userId);
+        Page<CommentInfoDto> commentsByPost = commentService.getCommentsByPost(postId, userId, pageable);
+        return ResponseEntity.ok(responseService.getSingleResult(CommentResponseDto.from(isWriter, commentsByPost)));
     }
 }
