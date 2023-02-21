@@ -1,5 +1,6 @@
 package com.backend.doyouhave.domain.user.dto;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,9 +11,11 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoginResponseDto {
+    @ApiModelProperty(value = "accessToken")
     @NotBlank
     private String accessToken;
 
+    @ApiModelProperty(value = "refreshToken")
     @NotBlank
     private String refreshToken;
 
