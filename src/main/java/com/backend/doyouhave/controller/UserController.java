@@ -2,6 +2,7 @@ package com.backend.doyouhave.controller;
 
 import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
+import com.backend.doyouhave.domain.resign.dto.ResignRequestDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.dto.KakaoLoginRequestDto;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
@@ -11,10 +12,7 @@ import com.backend.doyouhave.exception.ExceptionCode;
 import com.backend.doyouhave.exception.ExceptionResponse;
 import com.backend.doyouhave.service.PostService;
 import com.backend.doyouhave.service.UserService;
-import com.backend.doyouhave.service.result.MultiplePageResult;
-import com.backend.doyouhave.service.result.MultipleResult;
-import com.backend.doyouhave.service.result.ResponseService;
-import com.backend.doyouhave.service.result.SingleResult;
+import com.backend.doyouhave.service.result.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -89,5 +87,20 @@ public class UserController {
             @PageableDefault(size = 20) Pageable pageable) {
         Page<PostListResponseDto> postListResponseDtos = userService.marksList(userId, pageable);
         return ResponseEntity.ok(responseService.getMultiplePageResult(postListResponseDtos));
+    }
+
+    @PostMapping("/logout")
+    @ApiOperation(value = "로그아웃 API", notes = "DB의 refresh token을 삭제한다.")
+    public ResponseEntity<Result> logoutUser(@AuthenticationPrincipal Long userId) {
+        userService.deleteRefreshToken(userId);
+        return ResponseEntity.ok(responseService.getSuccessResult());
+    }
+
+    @PostMapping("/resign")
+    @ApiOperation(value = "회원탈퇴 API", notes = "탈퇴사유를 저장하고 사용자 데이터는 삭제한다.")
+    public ResponseEntity<Result> deleteUser(@AuthenticationPrincipal Long userId, @RequestBody @Valid ResignRequestDto request) {
+        userService.deleteUser(userId);
+        userService.saveResignReason(request.getReason());
+        return ResponseEntity.ok(responseService.getSuccessResult());
     }
 }

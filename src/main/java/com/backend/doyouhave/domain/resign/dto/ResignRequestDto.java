@@ -1,4 +1,4 @@
-package com.backend.doyouhave.domain.user.dto;
+package com.backend.doyouhave.domain.resign.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
@@ -9,8 +9,9 @@ import javax.validation.constraints.NotBlank;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class TokenRefreshRequestDto {
-    @ApiModelProperty(value = "refreshToken")
+public class ResignRequestDto {
+
+    @ApiModelProperty(value = "탈퇴 사유")
     @NotBlank
-    private String refreshToken;
+    private String reason;
 }
