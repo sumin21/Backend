@@ -11,10 +11,7 @@ import com.backend.doyouhave.exception.ExceptionCode;
 import com.backend.doyouhave.exception.ExceptionResponse;
 import com.backend.doyouhave.service.PostService;
 import com.backend.doyouhave.service.UserService;
-import com.backend.doyouhave.service.result.MultiplePageResult;
-import com.backend.doyouhave.service.result.MultipleResult;
-import com.backend.doyouhave.service.result.ResponseService;
-import com.backend.doyouhave.service.result.SingleResult;
+import com.backend.doyouhave.service.result.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -89,5 +86,12 @@ public class UserController {
             @PageableDefault(size = 20) Pageable pageable) {
         Page<PostListResponseDto> postListResponseDtos = userService.marksList(userId, pageable);
         return ResponseEntity.ok(responseService.getMultiplePageResult(postListResponseDtos));
+    }
+
+    @PostMapping("/logout")
+    @ApiOperation(value = "로그아웃 API", notes = "DB의 refresh token을 삭제한다.")
+    public ResponseEntity<Result> logoutUser(@AuthenticationPrincipal Long userId) {
+        userService.deleteRefreshToken(userId);
+        return ResponseEntity.ok(responseService.getSuccessResult());
     }
 }

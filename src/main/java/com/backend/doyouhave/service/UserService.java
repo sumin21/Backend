@@ -3,6 +3,7 @@ package com.backend.doyouhave.service;
 import com.backend.doyouhave.domain.comment.dto.CommentRequestDto;
 import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
+import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
@@ -90,5 +91,9 @@ public class UserService {
                 .findMarkedPostByUserId(userId, pageable)
                 .map(PostListResponseDto::new);
         return markedPostResponseDtos;
+    }
+
+    public void deleteRefreshToken(Long userId) {
+        authService.updateRefreshToken(userId, null);
     }
 }
