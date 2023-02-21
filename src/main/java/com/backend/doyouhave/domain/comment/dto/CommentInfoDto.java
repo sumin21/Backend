@@ -11,13 +11,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
-@Schema(description = "ChildCommentDto")
-@ApiModel(description = "ChildCommentDto")
+@Schema(description = "CommentInfoDto")
+@ApiModel(description = "CommentInfoDto")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ChildCommentDto {
+public class CommentInfoDto {
 
     @ApiModelProperty(value = "댓글 아이디", required = true, example = "1")
     @Schema(description = "댓글 아이디")
@@ -36,20 +38,24 @@ public class ChildCommentDto {
     @Schema(description = "댓글 내용")
     private String content;
 
-    @ApiModelProperty(value = "삭제되었는지 여부", required = true, example = "true")
+    @ApiModelProperty(value = "삭제되었는지 여부 (true라면 content='삭제된 댓글입니다')", required = true, example = "true")
     @Schema(description = "삭제 여부", required = true)
     private Boolean isRemoved;
 
-    @ApiModelProperty(value = "비밀댓글인지 여부", required = true, example = "true")
+    @ApiModelProperty(value = "비밀댓글인지 여부 (true라면 글쓴이와 본인만 확인 가능)", required = true, example = "true")
     @Schema(description = "비밀댓글 여부", required = true)
     private Boolean isSecret;
 
-    @ApiModelProperty(value = "댓글 작성자 유무", required = true, example = "true")
-    @Schema(description = "댓글 작성자 유무", required = true)
+    @ApiModelProperty(value = "현재 유저가 댓글 작성자인지 유무", required = true, example = "true")
+    @Schema(description = "현재 유저가 댓글 작성자인지 유무", required = true)
     private Boolean isCommentWriter;
 
+    @ApiModelProperty(value = "대댓글 목록 (1단계만)", required = true)
+    @Schema(description = "대댓글 목록 (1단계만)", required = true)
+    private List<ChildCommentDto> childComments = new ArrayList<>();
+
     @Builder
-    public ChildCommentDto(Comment comment, Long userId, String name, Boolean isParentCommentWriter) {
+    public CommentInfoDto(Comment comment, Long userId, String name) {
         this.commentId = comment.getId();
         this.createdDate = comment.getCreatedDate();
         this.name = name;
@@ -60,15 +66,15 @@ public class ChildCommentDto {
 
         this.content = comment.getContent();
         if (comment.isRemoved()) this.content = "삭제된 댓글입니다.";
-        else if (comment.isSecret() && !isWriter && !isCommentWriter && !isParentCommentWriter) this.content = "비밀 댓글입니다.";
+        else if (comment.isSecret() && (!isWriter && !isCommentWriter)) this.content = "비밀 댓글입니다.";
     }
 
-    public static ChildCommentDto from(Comment comment, Long userId, String name, Boolean isParentCommentWriter) {
-        return ChildCommentDto.builder()
+    public static CommentInfoDto from(Comment comment, Long userId, String name) {
+        return CommentInfoDto.builder()
                 .comment(comment)
                 .userId(userId)
                 .name(name)
-                .isParentCommentWriter(isParentCommentWriter)
                 .build();
     }
+
 }

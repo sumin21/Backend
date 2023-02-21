@@ -1,6 +1,5 @@
 package com.backend.doyouhave.service;
 
-import com.backend.doyouhave.domain.comment.dto.CommentResponseDto;
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostInfoDto;
@@ -25,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
