@@ -74,7 +74,6 @@ public class AuthService {
 
             JSONParser parser = new JSONParser();
             JSONObject elem = (JSONObject) parser.parse(response.getBody());
-            System.out.println("elem = " + elem);
             accessToken = (String) elem.get("access_token");
         } catch (Exception e) {
             throw new SocialLoginException();
@@ -140,7 +139,6 @@ public class AuthService {
 
             JSONParser parser = new JSONParser();
             JSONObject elem = (JSONObject) parser.parse(response.getBody());
-            System.out.println("elem = " + elem);
             accessToken = (String) elem.get("access_token");
         } catch (Exception e) {
             throw new SocialLoginException();

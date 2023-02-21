@@ -25,7 +25,7 @@ public class ResignReason extends BaseTimeEntity {
     private String reason;
 
     @Column(nullable = false)
-    private int count = 0;
+    private int count = 1;
 
     @Builder
     public ResignReason(String reason) {

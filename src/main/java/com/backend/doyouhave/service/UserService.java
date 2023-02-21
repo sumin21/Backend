@@ -5,6 +5,8 @@ import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
+import com.backend.doyouhave.domain.resign.ResignReason;
+import com.backend.doyouhave.domain.resign.dto.ResignRequestDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
@@ -13,6 +15,7 @@ import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.jwt.JwtTokenProvider;
 import com.backend.doyouhave.repository.notification.NotificationRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
+import com.backend.doyouhave.repository.resign.ResignReasonRepository;
 import com.backend.doyouhave.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,11 +34,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final PostRepository postRepository;
+    private final ResignReasonRepository resignReasonRepository;
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
 
     public LoginResponseDto signup(Role role, String code, String state) {
-
         if (role.equals(Role.KAKAO)) {
             String accessToken = authService.getKakaoAccessTokenByCode(code);
             Optional<User> kakaoUser = authService.saveUserInfoByKakaoToken(accessToken);
@@ -93,7 +96,25 @@ public class UserService {
         return markedPostResponseDtos;
     }
 
+    // refresh token 삭제
     public void deleteRefreshToken(Long userId) {
         authService.updateRefreshToken(userId, null);
+    }
+
+    // 사용자 삭제
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
+    }
+
+    // 사용자 탈퇴 사유 저장
+    public void saveResignReason(String reason) {
+        Optional<ResignReason> optionalResignReason = resignReasonRepository.findByReason(reason);
+        if(optionalResignReason.isPresent()){
+            ResignReason resignReason = optionalResignReason.get();
+            resignReason.setCount(resignReason.getCount() + 1);
+            resignReasonRepository.save(resignReason);
+        } else {
+            resignReasonRepository.save(ResignReason.from(reason));
+        }
     }
 }

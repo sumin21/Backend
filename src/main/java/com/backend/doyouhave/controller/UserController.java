@@ -2,6 +2,7 @@ package com.backend.doyouhave.controller;
 
 import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
+import com.backend.doyouhave.domain.resign.dto.ResignRequestDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.dto.KakaoLoginRequestDto;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
@@ -97,8 +98,9 @@ public class UserController {
 
     @PostMapping("/resign")
     @ApiOperation(value = "회원탈퇴 API", notes = "탈퇴사유를 저장하고 사용자 데이터는 삭제한다.")
-    public ResponseEntity<Result> deleteUser(@AuthenticationPrincipal Long userId) {
-
+    public ResponseEntity<Result> deleteUser(@AuthenticationPrincipal Long userId, @RequestBody @Valid ResignRequestDto request) {
+        userService.deleteUser(userId);
+        userService.saveResignReason(request.getReason());
         return ResponseEntity.ok(responseService.getSuccessResult());
     }
 }
