@@ -51,6 +51,9 @@ public class Post extends BaseTimeEntity {
     // 댓글 수 기준 정렬시 사용(성능 측면에서 조인보다 필드 정렬이 효율적)
     private long commentNum;
 
+    // 신고 횟수
+    private long reportedCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -69,6 +72,7 @@ public class Post extends BaseTimeEntity {
         this.category = category;
         this.tags = tags;
         this.viewCount = 0; // 전단지 첫 생성시 조회수 0으로 초기화, 상세정보 클릭시 카운팅
+        this.reportedCount = 0; // 전단지 첫 생성시 신고 횟수 0으로 초기화
         this.commentNum = this.getCommentList().size();
     }
 
