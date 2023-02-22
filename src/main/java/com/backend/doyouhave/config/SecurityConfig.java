@@ -18,6 +18,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Collections;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -43,19 +48,19 @@ public class SecurityConfig {
                 "/webjars/**",
                 "/api/users/kakao-login",
                 "/api/users/naver-login",
-                "/api/auth/token-refresh"
-        ).mvcMatchers(HttpMethod.GET, "/api/users/posts/**");
-
+                "/api/auth/token-refresh")
+                .mvcMatchers(HttpMethod.GET, "/api/users/posts/**");
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.csrf().disable()
+        return http
+                .cors().and()
+                .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
 
                 .authorizeRequests()
-                .antMatchers("/api/admins/**").hasRole("ADMIN")
                 .antMatchers("/swagger-resources/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -87,5 +92,20 @@ public class SecurityConfig {
                             ExceptionResponse.of(ExceptionCode.FAIL_AUTHORIZATION)
                     );
                 })).and().build();
+    }
+
+    // Cors 설정
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
