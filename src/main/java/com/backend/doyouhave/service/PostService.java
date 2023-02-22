@@ -2,12 +2,10 @@ package com.backend.doyouhave.service;
 
 import com.backend.doyouhave.domain.post.Category;
 import com.backend.doyouhave.domain.post.Post;
-import com.backend.doyouhave.domain.post.dto.PostInfoDto;
-import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
-import com.backend.doyouhave.domain.post.dto.PostUpdateRequestDto;
-import com.backend.doyouhave.domain.post.dto.PostUpdateResponseDto;
+import com.backend.doyouhave.domain.post.dto.*;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.UserLikes;
+import com.backend.doyouhave.domain.user.UserState;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.repository.post.CategoryRepository;
 import com.backend.doyouhave.repository.post.PostRepository;
@@ -34,6 +32,7 @@ public class PostService {
     private final UserLikesRepository userLikesRepository;
     private final UserRepository userRepository;
     private final CloudManager cloudManager;
+    private final long BANNED_COUNT = 3;
 
     /* 전단지 작성 */
     public Long savePost(Long userId, Post savedPost, MultipartFile imageFile, MultipartFile imageFileSecond) throws IOException {
@@ -206,9 +205,19 @@ public class PostService {
         return PostInfoDto.from(post, userId, mark, markNum);
     }
 
+    /* 신고 처리 */
     public void reportedPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
         post.setReportedCount(post.getReportedCount() + 1);
+        // 게시글당 신고 횟수가 3회 이상인 경우 계정 제한 상태로 변경
+        if(post.getReportedCount() >= BANNED_COUNT) {
+            post.getUser().setUserState(UserState.SUSPENDED);
+        }
         postRepository.save(post);
+    }
+
+    /* 신고된 전단지 리스트 반환 */
+    public Page<ReportedPostDto> findReportedPosts(Pageable pageable) {
+        return postRepository.findAllByReportedPost(pageable).map(ReportedPostDto::new);
     }
 }
