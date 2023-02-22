@@ -112,4 +112,10 @@ public class PostController {
         return ResponseEntity.ok(responseService.getSingleResult(result));
     }
 
+    @PostMapping("/posts/{postId}/report")
+    @ApiOperation(value = "전단지 신고 API", notes = "해당 전단지를 신고한다.")
+    public ResponseEntity<Result> reportPost(@PathVariable Long postId) {
+        postService.reportedPost(postId);
+        return ResponseEntity.ok(responseService.getSuccessResult());
+    }
 }

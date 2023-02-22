@@ -206,4 +206,9 @@ public class PostService {
         return PostInfoDto.from(post, userId, mark, markNum);
     }
 
+    public void reportedPost(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(NotFoundException::new);
+        post.setReportedCount(post.getReportedCount() + 1);
+        postRepository.save(post);
+    }
 }
