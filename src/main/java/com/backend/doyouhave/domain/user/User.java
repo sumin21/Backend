@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,14 @@ public class User extends BaseTimeEntity {
     @Column(name = "refresh_token")
     private String refreshToken;
 
+    // 최근 접속일자 (로그인시 LocalDateTime.now()로 업데이트)
+    private LocalDateTime recentDate;
+
+    // 회원 상태
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserState userState;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
@@ -72,6 +81,7 @@ public class User extends BaseTimeEntity {
                 .img(img)
                 .nickname(nickname)
                 .role(Role.KAKAO)
+                .userState(UserState.NORMAL)
                 .build();
     }
 
@@ -82,6 +92,7 @@ public class User extends BaseTimeEntity {
                 .img(img)
                 .nickname(nickname)
                 .role(Role.NAVER)
+                .userState(UserState.NORMAL)
                 .build();
     }
 }
