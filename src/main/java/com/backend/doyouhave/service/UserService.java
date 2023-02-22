@@ -5,11 +5,13 @@ import com.backend.doyouhave.domain.notification.Notification;
 import com.backend.doyouhave.domain.notification.dto.NotificationResponseDto;
 import com.backend.doyouhave.domain.post.Post;
 import com.backend.doyouhave.domain.post.dto.PostListResponseDto;
+import com.backend.doyouhave.domain.post.dto.ReportedPostDto;
 import com.backend.doyouhave.domain.resign.ResignReason;
 import com.backend.doyouhave.domain.resign.dto.ResignRequestDto;
 import com.backend.doyouhave.domain.user.Role;
 import com.backend.doyouhave.domain.user.User;
 import com.backend.doyouhave.domain.user.dto.LoginResponseDto;
+import com.backend.doyouhave.domain.user.dto.UserInfoDto;
 import com.backend.doyouhave.domain.user.dto.UserProfileResponseDto;
 import com.backend.doyouhave.exception.NotFoundException;
 import com.backend.doyouhave.jwt.JwtTokenProvider;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,6 +69,7 @@ public class UserService {
     public LoginResponseDto login(User user) {
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
         authService.updateRefreshToken(user.getId(), refreshToken);
+        user.setRecentDate(LocalDateTime.now());
 
         return LoginResponseDto.from(
                 jwtTokenProvider.createAccessToken(user.getId()),
@@ -116,5 +120,9 @@ public class UserService {
         } else {
             resignReasonRepository.save(ResignReason.from(reason));
         }
+    }
+
+    public Page<UserInfoDto> findUsersInfo(Pageable pageable) {
+        return userRepository.findAll(pageable).map(UserInfoDto::new);
     }
 }
