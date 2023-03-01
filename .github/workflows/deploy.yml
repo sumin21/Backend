@@ -24,4 +24,5 @@ jobs:
           script: |
             cd doyouhave/Backend/
             chmod +x deploy.sh
+            ls
             ./deploy.sh
