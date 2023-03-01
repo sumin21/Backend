@@ -23,4 +23,5 @@ jobs:
           port: ${{secrets.NCLOUD_SERVER_PORT}}
           script: |
             cd doyouhave/Backend/
+            chmod +x deploy.sh
             ./deploy.sh
